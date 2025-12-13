@@ -81,11 +81,11 @@ make sim-int
 
 FPGA board projects are in the `boards/` directory:
 
-- **Tang Console 60K (Gowin GW5AT-60B)**: `z8086_console60k.gprj` (Gowin IDE). Includes core, SoC top, RAM, pin/timing constraints. Features 50 MHz clock, SPI LCD (port 7), LEDs, reset button.
-- **MicroPhase XC7A35T (Artix-7)**: `z8086.xpr` (Vivado). Includes all sources, SoC, and pin constraints.
-- **DE10-Nano (Cyclone V)**: Project files coming soon.
+- **Tang Console 60K (Gowin GW5AT-60B)**: `z8086_console60k.gprj` (Gowin IDE). Drives LED pmod or Muse Labs LCD pmod. Press S1 button to start.
+- **MicroPhase XC7A35T (Artix-7)**: `z8086.xpr` (Vivado 2021.1). Drives onboard LED. For LCD, see photo linked below for connections. Press K1 button to start.
+- **DE10-Nano (Cyclone V)**: `z8086.qpf` (Quartus Prime). Drives onboard LED. For LCD, see photo linked below for connections. Press KEY0 to start.
 
-See LCD demo screenshots: DE10-Nano, [Tang Console 60K](tang_lcd.jpg), [MicroPhase Artix7](doc/microphase_lcd.jpg)
+See LCD demo screenshots: DE10-Nano, [Tang Console 60K](tang_lcd.jpg), [MicroPhase Artix7](doc/microphase_lcd.jpg), [DE10-Nano](doc/de10nano_lcd.jpg).
 
 ## Example SoC Integration
 
@@ -131,7 +131,7 @@ Here are the memory interface:
 - `word`: 1=16-bit access, 0=8-bit access
 - `ready`: Memory/IO ready (handshake)
 
-**Bus Transaction Protocol:**
+**Bus Protocol:**
 1. The z8086 core asserts `rd` (read) or `wr` (write) along with valid `addr`, `word`, and `io` signals.
 2. The external memory or I/O subsystem initiates and completes the requested operation.
 3. When the operation is finished, the external logic sets `ready=1`. For reads, data must be present on `din`.
@@ -147,29 +147,32 @@ The example SoC in `z8086_top.sv` and the `programs/` directory demonstrate one 
 1. **Write your firmware:** Create your program in 8086 assembly language. You can find example programs in the `programs/` directory.
 2. **Build the firmware:**
    - Use the Makefile in `programs/` to automate the build process. The Makefile invokes [NASM](https://www.nasm.us/) to assemble `.asm` sources into `.bin` binaries.
-   - These binaries are then automatically converted to `.hex` format for FPGA loading.
+   - These binaries are then converted to `.hex` format for FPGA loading.
 3. **Understanding the memory map and program loading:**
    - The system is configured with 128KB of main memory. Even-numbered segments map to the lower 64KB ("data segment"), while odd-numbered segments map to the upper 64KB ("program segment").
    - When building, the `program.hex` output places an empty 64KB in the first half, and the assembled program in the second 64KB. 
-   - The SoC module `z8086_top.sv` uses `$readmemh` to load `program.hex` directly into FPGA RAM.
+   - The SoC module `z8086_top.sv` uses `$readmemh` to load the `.hex` directly into FPGA RAM.
    - A reset vector trampoline (far jump to F000:0000) is at the end of the second page (offset FFF0).
 4. **Boot procedure:** Upon reset, the CPU sets CS:IP to FFFF:0000 and executes that far jump. Execution then continues from F000:0000, the start of the user program, which is correctly mapped to the program segment.
 
 ### Example Programs
 
-Two example firmware files are included in the `programs/` directory:
+Several example firmware files are included in the `programs/` directory:
 - `blinky.asm`: Minimal example toggling LEDs and counting up.
-- `lcd_demo.asm`: Demonstrates basic LCD display functionality.
+- `lcd_bars.asm`: Demonstrates basic LCD display functionality.
+- `lcd_shapes.asm`: Repeated square drawing.
 
 Refer to these examples as starting points for your own programs, and consult `z8086_top.sv` for detailed integration.
 
 ## Documentation
 
-- **[`doc/z8086.md`](../../doc/z8086.md)**: Comprehensive developer guide covering architecture, microcode, implementation details, and signal reference
+Coming soon.
+
+<!-- - **[`doc/z8086.md`](../../doc/z8086.md)**: Comprehensive developer guide covering architecture, microcode, implementation details, and signal reference -->
 
 ## Acknowledgements
 
-z8086 won't be possible without the excellent reverse enginnering work by [Ken Shirriff](https://www.righto.com/search/label/808) and [Andrew Jenner](https://www.reenigne.org/blog/8086-microcode-disassembled/).
+z8086 would not have been possible without the outstanding reverse engineering work of [Ken Shirriff](https://www.righto.com/search/label/808) and [Andrew Jenner](https://www.reenigne.org/blog/8086-microcode-disassembled/).
 
 ## Cite
 
@@ -186,5 +189,5 @@ z8086 won't be possible without the excellent reverse enginnering work by [Ken S
 
 z8086 was developed primarily as an educational and learning tool. For broader or commercial use, the main limitation is the copyright status of the original 8086 microcode. Ideally, Intel would formally release the rights to this significant historical code.
 
-As for z8086 itself, I've decided to released it under the permissive Apache 2.0 license.
+As for z8086 itself, I have chosen to release it under the permissive Apache 2.0 license.
 
