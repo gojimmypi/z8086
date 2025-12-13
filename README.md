@@ -20,6 +20,8 @@ This is the first experimental release. The core passes all single-instruction t
 
 ### Architecture
 
+![](doc/z8086.svg)
+
 The z8086 maintains the logical distinction between BIU (Bus Interface Unit) and EU (Execution Unit) but implements them in a unified datapath. The core includes:
 
 - **Microcode Engine**: Fetches micro-instructions from the 512-word ROM (with address compression) and orchestrates all key CPU operations
@@ -34,7 +36,7 @@ The z8086 maintains the logical distinction between BIU (Bus Interface Unit) and
 
 The core implementation is located in `src/`:
 
-- **`src/z8086/z8086.sv`**: Main CPU core (top-level module)
+- **`src/z8086/z8086.sv`**: Main CPU core
 - **`src/z8086/alu.sv`**: 16-bit ALU and flag computation
 - **`src/z8086/ucode.hex`**: Microcode ROM image (512 × 21-bit words)
 - **`src/soc/z8086_top.sv`**: Example SoC top-level with memory interface

@@ -19,10 +19,11 @@ build: obj_dir/V$(TOP)
 sim: obj_dir/V$(TOP)
 	./obj_dir/V$(TOP)
 
-obj_dir/V$(TOP): $(SRC_V) sim_main.cpp
+obj_dir/V$(TOP): $(SRC_V) sim_main.cpp ../src/z8086/ucode.hex
 	$(VERILATOR) -cc --exe +incdir+../src --build -Wall -Wno-PINCONNECTEMPTY --timing --top-module $(TOP) \
 	  -Wno-IMPLICITSTATIC -Wno-TIMESCALEMOD -Wno-UNDRIVEN -Wno-UNUSEDSIGNAL -Wno-WIDTHEXPAND -Wno-VARHIDDEN -Wno-PROCASSINIT -Wno-CASEINCOMPLETE \
 	  --trace-fst -sv $(SRC_V) sim_main.cpp --error-limit 0
+	cp ../src/z8086/ucode.hex .
 
 # Interrupt test targets
 build-int: obj_dir/Vtb_interrupt_test
