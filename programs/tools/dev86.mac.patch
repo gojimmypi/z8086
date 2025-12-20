@@ -1,0 +1,54 @@
+diff --git a/cpp/cpp.c b/cpp/cpp.c
+index a6e7337..1ca4422 100644
+--- a/cpp/cpp.c
++++ b/cpp/cpp.c
+@@ -545,7 +545,7 @@ chget()
+ }
+ 
+ static void 
+-unchget(ch)
++unchget(int ch)
+ {
+ #if CPP_DEBUG
+    fprintf(stderr, "\b", ch);
+diff --git a/makefile.in b/makefile.in
+index b586da1..b32d537 100644
+--- a/makefile.in
++++ b/makefile.in
+@@ -43,7 +43,7 @@ WALL  =-Wall -Wtraditional -Wshadow -Wpointer-arith \
+ CFLAGS	=$(GCCFLAG) $(WALL) -O2 -g
+ #else
+ WALL  =-Wall -Wstrict-prototypes
+-CFLAGS	=$(GCCFLAG) -O2 -fno-strict-aliasing
++CFLAGS	=$(GCCFLAG) -O2 -fno-strict-aliasing -Wno-error=implicit-function-declaration -Wimplicit-int
+ #endif
+ 
+ #endif
+diff --git a/unproto/tok_io.c b/unproto/tok_io.c
+index 3cae52e..12bd92d 100644
+--- a/unproto/tok_io.c
++++ b/unproto/tok_io.c
+@@ -228,7 +228,7 @@ static int do_control()
+ 	    }
+ 	    out_line = in_line = line;		/* synchronize */
+ 	    out_path = in_path = path;		/* synchronize */
+-	    return;
++	    return 0;
+ 
+ #ifdef IGNORE_DIRECTIVES
+ 
+@@ -259,12 +259,12 @@ static int do_control()
+ 	    do {
+ 		tok_flush(t);
+ 	    } while (t->tokno != '\n' && (t = tok_get()));
+-	    return;
++	    return 0;
+ 
+ 	case 0:
+ 	    /* Hit EOF, punt. */
+ 	    put_ch('#');
+-	    return;
++	    return 0;
+ 	}
+     }
+ }

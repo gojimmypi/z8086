@@ -2,6 +2,9 @@
 //
 // All segments are 0xF000
 //
+// This requires the dev86 toolchain: https://github.com/lkundrak/dev86
+// On my Mac, I built it after applying the patch in tools/dev86.mac.patch
+//
 // December 2025
 #include "soc_hdmi.h"
 
@@ -744,6 +747,10 @@ void uart_print(str)
     }
 }
 
+/* 
+Entry point. Ideally this should become crt0.s. 
+tools/build_hex.py generates the reset code to jump to `start`.
+*/
 #asm
 start:
     cli
@@ -752,23 +759,6 @@ start:
     mov     ss, ax           ; SS = 0xF000
     mov     sp, #0xFFF0      ; SP = 0xFFF0
     sti                    
-
-
-    ; Print hello message to screen
-//     mov     ax, #0xB800
-//     mov     es, ax           ; ES = 0xB800
-//     mov     ax, #((80*24+27) * 2)
-//     mov     di, ax          ; center of line 24
-//     mov     si, #hello_msg
-//     mov     ah, #0x0F       ; Attribute: white on black
-// .print_loop:
-//     lodsb                   ; Load byte from DS:SI into AL, increment SI
-//     test    al, al          ; Check for null terminator
-//     jz      .done
-//     stosb                   ; Store character at ES:DI, increment DI
-//     mov     al, ah
-//     stosb                   ; Store attribute at ES:DI, increment DI
-//     jmp     .print_loop
 
 .done:
     call    _main

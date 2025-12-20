@@ -14,9 +14,9 @@ The z8086 core is a faithful implementation of the 8086 microprocessor architect
 - **Bit-slice ALU**: Explicit 16×1-bit slice design with accurate flags (DAA/DAS/AAA/AAS, shifts/rotates, etc.)
 - **FPGA-friendly**: Single clock, synchronous design, no vendor primitives
 
-This is the first experimental release. The core passes all single-instruction tests, achieving a 100% pass rate (16,150 out of 16,150 vectors) with full 8086 instruction set coverage—including arithmetic, logic, shifts, control flow, string operations, multiplication/division, interrupts, I/O, and BCD/ASCII adjust instructions. FPGA synthesis has been validated on both Gowin GW5A and Xilinx Artix-7 platforms. Note that current limitations include non-cycle-accurate timing, no LOCK pin support, and no coprocessor interface.
+This project is still experimental. The core passes all single-instruction tests, achieving a 100% pass rate (16,150 out of 16,150 vectors) with full 8086 instruction set coverage—including arithmetic, logic, shifts, control flow, string operations, multiplication/division, interrupts, I/O, and BCD/ASCII adjust instructions. FPGA synthesis has been validated on Gowin GW5A, Xilinx Artix-7 and Altera Cyclone-V platforms. Note that current limitations include non-cycle-accurate timing, no LOCK pin support, and no coprocessor interface.
 
-**Resource usage**: ~1800 LUTs on Xilinx Artix7, ~1179 ALMs on Altera Cyclone V, ~2500 LUTs on Gowin GW5A. One BRAM block is used for the microcode. The code is about 1800 lines of SystemVerilog.
+**Resource usage**: ~1800 LUTs on Xilinx Artix7, ~1200 ALMs on Altera Cyclone V, ~2500 LUTs on Gowin GW5A. One BRAM block is used for the microcode. The code is about 1800 lines of SystemVerilog.
 
 ### Architecture
 
