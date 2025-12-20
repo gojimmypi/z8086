@@ -166,6 +166,33 @@ Several example firmware files are included in the `programs/` directory:
 
 Refer to these examples as starting points for your own programs, and consult `z8086_top.sv` for detailed integration.
 
+## HDMI SoC demo
+
+# z8086 soc_hdmi demo
+
+This is a larger demo: a complete 8086-compatible SoC featuring HDMI video output, UART communication, and embedded firmware. It currently targets the Tang Console 60K. The Gowin project file is located at `boards/Tang Console 60K.soc_hdmi`, with source files in `src/soc_hdmi`, and firmware in `programs/soc_hdmi.c`.
+
+```
+┌───────────────────────────────────────────────────────┐
+│                  z8086  soc_hdmi                      │
+│  ┌──────────┐    ┌──────────┐    ┌─────────────────┐  │
+│  │  z8086   │◄──►│   RAM    │    │   z8086hdmi     │  │
+│  │   CPU    │    │  128KB   │    │  Video Engine   │-─┼──► HDMI
+│  └──────────┘    └──────────┘    │  - Font ROM     │  │
+│       │                          │  - VRAM (4KB)   │  │
+│       │          ┌──────────┐    │  - Color Palette│  │
+│       └─────────►│ uart_    │    └─────────────────┘  │
+│                  │ simple   │────────────────────────-┼──► UART
+│                  └──────────┘                         │
+│                                                       │
+│  Clocks: 50MHz (logic) → 74.25MHz (pixel) → 371.25MHz │
+└───────────────────────────────────────────────────────┘
+```
+
+Don't miss *snake* 😁:
+
+<img src="doc/snake.png" width=500>
+
 ## Documentation
 
 * Blog post: [z8086: Rebuilding the 8086 from Original Microcode](https://nand2mario.github.io/posts/2025/z8086/)

@@ -1,0 +1,26 @@
+-series GW5AT
+-device GW5AT-60
+-device_version B
+-package PBGA484A
+-part_number GW5AT-LV60PG484AC1/I0
+
+
+-mod_name vram
+-file_name vram
+-path /Users/zf/work/ic/8086-experiments/06.z8086soc/src/
+-type RAM_DP
+-file_type vlg
+-bram_b true
+-dev_type GW5AT-60B
+-depth_0 2400
+-depth_1 2400
+-width_0 16
+-width_1 16
+-read_mode_0 bypass
+-read_mode_1 bypass
+-write_mode_0 normal
+-write_mode_1 normal
+-speed false
+-reset_mode sync
+-init_file /Users/zf/work/ic/8086-experiments/06.z8086soc/data/screen.mi
+-init_match port_A
