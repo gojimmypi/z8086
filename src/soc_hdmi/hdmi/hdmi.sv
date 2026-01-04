@@ -1,7 +1,7 @@
 // Implementation of HDMI Spec v1.4a
 // By Sameer Puri https://github.com/sameer
 
-module hdmi 
+module hdmi
 #(
     // Defaults to 640x480 which should be supported by almost if not all HDMI sinks.
     // See README.md or CEA-861-D for enumeration of video id codes.
@@ -69,12 +69,15 @@ module hdmi
     // synchronous reset back to 0,0
     input logic reset,
     input logic [23:0] rgb,
-    input logic [AUDIO_BIT_WIDTH-1:0] audio_sample_word [1:0],
+
+    // NOTE: minimal change for Yosys compatibility:
+    // flatten unpacked array port "audio_sample_word [1:0]" into a packed vector.
+    input logic [2*AUDIO_BIT_WIDTH-1:0] audio_sample_word,
 
     // These outputs go to your HDMI port
     output logic [2:0] tmds,
     output logic tmds_clock,
-    
+
     // All outputs below this line stay inside the FPGA
     // They are used (by you) to pick the color each pixel should have
     // i.e. always_ff @(posedge pixel_clk) rgb <= {8'd0, 8'(cx), 8'(cy)};
@@ -97,6 +100,12 @@ logic vsync;
 logic [BIT_WIDTH-1:0] hsync_pulse_start, hsync_pulse_size;
 logic [BIT_HEIGHT-1:0] vsync_pulse_start, vsync_pulse_size;
 logic invert;
+
+// Unpack flattened audio port back into the original 2-element array form
+// for internal use and for modules that expect the unpacked array.
+logic [AUDIO_BIT_WIDTH-1:0] audio_sample_word_arr [1:0];
+assign audio_sample_word_arr[0] = audio_sample_word[AUDIO_BIT_WIDTH-1:0];
+assign audio_sample_word_arr[1] = audio_sample_word[2*AUDIO_BIT_WIDTH-1:AUDIO_BIT_WIDTH];
 
 // See CEA-861-D for more specifics formats described below.
 generate
@@ -290,7 +299,7 @@ generate
             else
             begin
                 data_island_guard <= num_packets_alongside > 0 && (
-                    (cx >= screen_width + 12 && cx < screen_width + 14) /* leading guard */ || 
+                    (cx >= screen_width + 12 && cx < screen_width + 14) /* leading guard */ ||
                     (cx >= screen_width + 14 + num_packets_alongside * 32 && cx < screen_width + 14 + num_packets_alongside * 32 + 2) /* trailing guard */
                 );
                 data_island_preamble <= num_packets_alongside > 0 && cx >= screen_width + 4 && cx < screen_width + 12;
@@ -300,10 +309,14 @@ generate
 
         // See Section 5.2.3.4
         logic [23:0] header;
-        logic [55:0] sub [3:0];
+
+        // Packed "sub" bridge between packet_picker and packet_assembler.
+        logic [4*56-1:0] sub_flat;
+
         logic video_field_end;
         assign video_field_end = cx == screen_width - 1'b1 && cy == screen_height - 1'b1;
         logic [4:0] packet_pixel_counter;
+
         packet_picker #(
             .VIDEO_ID_CODE(VIDEO_ID_CODE),
             .VIDEO_RATE(VIDEO_RATE),
@@ -313,10 +326,35 @@ generate
             .VENDOR_NAME(VENDOR_NAME),
             .PRODUCT_DESCRIPTION(PRODUCT_DESCRIPTION),
             .SOURCE_DEVICE_INFORMATION(SOURCE_DEVICE_INFORMATION)
-        ) packet_picker (.clk_pixel(clk_pixel), .clk_audio(clk_audio), .reset(reset), .video_field_end(video_field_end), .packet_enable(packet_enable), .packet_pixel_counter(packet_pixel_counter), .audio_sample_word(audio_sample_word), .header(header), .sub(sub));
-        logic [8:0] packet_data;
-        packet_assembler packet_assembler (.clk_pixel(clk_pixel), .reset(reset), .data_island_period(data_island_period), .header(header), .sub(sub), .packet_data(packet_data), .counter(packet_pixel_counter));
+        ) packet_picker (
+            .clk_pixel(clk_pixel),
+            .clk_audio(clk_audio),
+            .reset(reset),
+            .video_field_end(video_field_end),
+            .packet_enable(packet_enable),
+            .packet_pixel_counter(packet_pixel_counter),
 
+            // packet_picker now expects packed audio input
+            .audio_sample_word(audio_sample_word),
+
+            .header(header),
+
+            // packet_picker now outputs packed sub
+            .sub(sub_flat)
+        );
+
+        logic [8:0] packet_data;
+
+        // packet_assembler now expects packed sub input
+        packet_assembler packet_assembler (
+            .clk_pixel(clk_pixel),
+            .reset(reset),
+            .data_island_period(data_island_period),
+            .header(header),
+            .sub(sub_flat),
+            .packet_data(packet_data),
+            .counter(packet_pixel_counter)
+        );
 
         always_ff @(posedge clk_pixel)
         begin
@@ -361,15 +399,40 @@ endgenerate
 
 // All logic below relates to the production and output of the 10-bit TMDS code.
 logic [9:0] tmds_internal [NUM_CHANNELS-1:0] /* verilator public_flat */ ;
+
 genvar i;
 generate
     // TMDS code production.
     for (i = 0; i < NUM_CHANNELS; i++)
     begin: tmds_gen
-        tmds_channel #(.CN(i)) tmds_channel (.clk_pixel(clk_pixel), .video_data(video_data[i*8+7:i*8]), .data_island_data(data_island_data[i*4+3:i*4]), .control_data(control_data[i*2+1:i*2]), .mode(mode), .tmds(tmds_internal[i]));
+        tmds_channel #(.CN(i)) tmds_channel (
+            .clk_pixel(clk_pixel),
+            .video_data(video_data[i*8+7:i*8]),
+            .data_island_data(data_island_data[i*4+3:i*4]),
+            .control_data(control_data[i*2+1:i*2]),
+            .mode(mode),
+            .tmds(tmds_internal[i])
+        );
     end
 endgenerate
 
-serializer #(.NUM_CHANNELS(NUM_CHANNELS), .VIDEO_RATE(VIDEO_RATE)) serializer(.clk_pixel(clk_pixel), .clk_pixel_x5(clk_pixel_x5), .reset(reset), .tmds_internal(tmds_internal), .tmds(tmds), .tmds_clock(tmds_clock));
+// Pack unpacked TMDS array into a flat vector for Yosys-friendly serializer port.
+logic [NUM_CHANNELS*10-1:0] tmds_internal_flat;
+genvar p;
+generate
+    for (p = 0; p < NUM_CHANNELS; p = p + 1)
+    begin: pack_tmds_internal
+        assign tmds_internal_flat[p*10 +: 10] = tmds_internal[p];
+    end
+endgenerate
+
+serializer #(.NUM_CHANNELS(NUM_CHANNELS), .VIDEO_RATE(VIDEO_RATE)) serializer(
+    .clk_pixel(clk_pixel),
+    .clk_pixel_x5(clk_pixel_x5),
+    .reset(reset),
+    .tmds_internal(tmds_internal_flat),
+    .tmds(tmds),
+    .tmds_clock(tmds_clock)
+);
 
 endmodule

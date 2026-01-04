@@ -35,7 +35,7 @@ reg popf_hi_is_f = POPF_HI_IS_F;
 
 // Upper (BIU) register file
 reg [15:0] CS = 16'hFFF0;    // segment registers
-reg [15:0] DS, ES, SS;       
+reg [15:0] DS, ES, SS;
 reg [15:0] IP;               // instruction pointer
 reg [15:0] IND, OPR;         // indirect and operand regs for memory access
 reg [15:0] IND_pre_update;   // IND after "move" and before "action"
@@ -69,15 +69,15 @@ reg [12:0] SR;               // SR 126: microcode saved return address
 reg [4:0]  M, M_next;        // M 104: source bus code (r/m or IR[2:0])
 reg [4:0]  N, N_next;        // N 106: destination bus code (reg or IR[5:3])
 reg [3:0]  X;                // X 108: ALU operation (IR[6:3])
-wire       X0 = X[0];     
+wire       X0 = X[0];
 reg        BPE;              // base prefix enable
 reg        BPL;              // base prefix low
 reg        BPH;              // base prefix high
 reg  [3:0] CNT;              // loop counter for MAXC,NCZ
 reg        Z16;              // internal zero flag - NZ tests this for loops
 reg        XC;               // extended condition code
-     
-// Microcode signals     
+
+// Microcode signals
 reg [20:0] uc;               // current 21-bit microcode
 wire [8:0] uaddr;            // 9-bit microcode address (512 words)
 reg        ROME;             // ROM-enable: `uc` is valid this cycle
@@ -141,7 +141,7 @@ reg        g_1bl;            // One-byte logic (1BL) instruction: prefixes, HLT,
 reg        g_w;              // instruction where bit 0 is byte/word indicator.
 reg        g_forcebyte;      // byte operation
 reg        g_len1;           // byte operation when bit 1 is set
-reg        g_carry, g_carry2;// allows a carry update. 
+reg        g_carry, g_carry2;// allows a carry update.
 wire       modrm_present = ~g_2br_not;
 reg        g_alu_in_opcode;  // Column 12: an instruction with bits 5-3 specifying the ALU instruction.
 reg        ea_uses_bp;       // rm that includes BP uses SS by default; [disp16] (mod==00 && rm==110) uses DS
@@ -149,8 +149,8 @@ reg        writes_memory;    // memory destination instruction has to end on a b
 reg        MOD1;             // jump if 1 byte offset in effective address
 reg        L8;               // byte instruction
 reg        L8_aux;           // aux L8 for ALU and memory operations
-wire       L8_next;  
-wire       L8_aux_next;  
+wire       L8_next;
+wire       L8_aux_next;
 reg        F1;               // REP prefix active, and sign in multiplication
 reg        F1Z;              // REPZ vs REPNZ (IR[0])
 
@@ -168,7 +168,7 @@ reg        intr_pending;     // Latched INTR request
 reg        nmi_pending;      // Latched NMI request
 reg        nmi_r, nmi_rr;    // NMI synchronizer (edge detection)
 wire       interrupt_request = nmi_pending | intr_pending;
-reg        delay_interrupt;  // delay interrupt by one instruction, 
+reg        delay_interrupt;  // delay interrupt by one instruction,
                              // set after prefix / segment register instruction
 
 // Prefetching: 3 x 16-bit words
@@ -277,21 +277,21 @@ always @(posedge clk) begin
 
         // EU memory access start (type 6)
         if (ROME & ~stall & T6) begin
-            automatic logic [15:0] segment;
+            logic [15:0] segment;
             bus_pending <= 1'b1;
             bus_wr <= uc[6];
             bus_inta <= uc[5];   // IRQ bit
             bus_io <= 1'b0;
             bus_word <= ~L8_aux;
             case (uc[3:2])
-            2'b00: segment = ES;    // DA -> ES 
+            2'b00: segment = ES;    // DA -> ES
             2'b01: begin
                 segment = 16'h0;    // D0 -> either segment 0 or I/O port
                 bus_io <= g_inout;
             end
             2'b10: segment = SS;    // DS -> SS
             2'b11:                  // DD: SS or DS
-                segment = BPE ? seg_from_code({BPH, BPL}) : (ea_uses_bp ? SS : DS); 
+                segment = BPE ? seg_from_code({BPH, BPL}) : (ea_uses_bp ? SS : DS);
             endcase
             bus_seg <= segment;
             bus_ind <= IND_pre_update;
@@ -373,7 +373,7 @@ always @(posedge clk) begin
                         bus_wait  <= 1'b0;
                     end
                 end
-            end            
+            end
         endcase
 
         if (ROME & ~stall) begin
@@ -403,9 +403,9 @@ end
 // Segment override prefix (BPE/BPH/BPL) supersedes the default.
 function automatic [15:0] seg_from_code(input [1:0] code);
     case (code)
-    2'b00: seg_from_code = CS; 
-    2'b01: seg_from_code = DS; 
-    2'b10: seg_from_code = SS; 
+    2'b00: seg_from_code = CS;
+    2'b01: seg_from_code = DS;
+    2'b10: seg_from_code = SS;
     default: seg_from_code = ES;
     endcase
 endfunction
@@ -418,8 +418,8 @@ assign     q_full   = (q_next_w == q_rptr);
 assign     q_empty  = (q_rptr == q_wptr) | (ROME & FLUSH);
 reg  [2:0] q_consumed;      // how many bytes have been consumed by the current instruction
 assign     q_len =  q_rptr == q_wptr ? 3'd0 :
-                      q_wptr > q_rptr ? 
-                      {q_wptr - q_rptr, 1'b0} - q_hl: 
+                      q_wptr > q_rptr ?
+                      {q_wptr - q_rptr, 1'b0} - q_hl:
                       ((3'd3 + q_wptr - q_rptr) << 1) - q_hl;
 // IP points to next fetch address
 // arch_IP = IP - q_consumed - q_len
@@ -438,7 +438,7 @@ always @(posedge clk) begin
               FC |                          // load first byte
               (ROME & uc_s == LOC_Q & ~stall) | // source is Q
               (SC & ~g_1bl & modrm_present) // consume ModR/M at SC for this instruction
-            )) begin   
+            )) begin
             if (!q_hl) begin                // consumed low byte, next is high
                 q_hl <= 1'b1;
             end else begin                  // consumed high byte, advance to next word
@@ -449,12 +449,12 @@ always @(posedge clk) begin
         end
         if (loader_state == 2'd2 & (RNI | NXT))
             q_consumed <= FC ? 3'b1 : 3'b0; // reset consumed bytes for a new instruction
-        if (SC & g_1bl) 
+        if (SC & g_1bl)
             q_consumed <= 3'b0;             // reset consumed bytes for 1-byte logic instructions
 
         // write word to Q
         if (bus_state == BUS_WAIT & ready & ~bus_wait & ~q_suspended) begin
-            q_wptr <= q_next_w; 
+            q_wptr <= q_next_w;
             if (IP[0]) q_hl <= 1'b1;      // byte read for odd address
         end
 
@@ -478,13 +478,13 @@ end
 // FC: when Q ready, load 1st byte into IR, uaddr(AR and CR), start group decode
 // SC: group signals ready, Q ready if 2BR, loading first microcode, set microcode_active=1
 // SC+1: microcode out, start execution, load uaddr_next
-// SC+2: first microcode done, start executing 2nd microcode 
+// SC+2: first microcode done, start executing 2nd microcode
 
 wire EXEC = loader_state[1];        // sequencer has control
 reg RNI_null;  // WB nulls next uinstruction's RNI if EA refers to memory
 // RNI and NXT as generated by ROM-OUT 144 to LOADER 130
 assign RNI = ROME & ~RNI_null & ~bus_pending & ~bus_wait &
-                 (T6 & uc[4] |                     // Letter Q when Typ=6 
+                 (T6 & uc[4] |                     // Letter Q when Typ=6
                   T4 & uc[2:0] == 3'b000 & ~writes_memory);   // STU=0 when Typ=4
 assign NXT = ROME & T1 & uc[0] & ~bus_pending & ~bus_wait & ~writes_memory;
 wire uc_f = uc[10] == 1'b1;
@@ -511,14 +511,14 @@ wire t_disp_not = SC ? ~(q_bus[7] ^ q_bus[6]) : t_disp_not_r;  // mode=00 or 11
 always @(posedge clk) t_disp_not_r <= t_disp_not;
 wire t_mem_read_not = g_modrm_not;  // ModR/M byte exists and performs read/modify/write on its argument.
 // translation ROM output: goes to {AR, CR} for modrm and jump/call
-wire [12:0] t_out = translate(t_mem, t_mode_rm, t_disp_not, t_mem_read_not);  
+wire [12:0] t_out = translate(t_mem, t_mode_rm, t_disp_not, t_mem_read_not);
 
 // Loader state machine
 always @(posedge clk) begin
     if (!reset_n) begin
         loader_state <= 2'd0;
     end else begin
-        case (loader_state) 
+        case (loader_state)
         2'd0: if (FC)                loader_state <= 2'd1;
         2'd1: if (g_1bl)             loader_state <= 2'd0;
               else if (SC)           loader_state <= 2'd2;
@@ -543,9 +543,9 @@ assign stall = (ROME & q_empty & (EXEC & uc_s == LOC_Q)) | bus_wait | bus_pendin
 assign L8_next = g_w & ~IR[0] | g_len1 & IR[1] | g_forcebyte | IR[7:3] == 5'b1011_0;    // byte instruction
 assign L8_aux_next = (g_w & ~IR[0] | g_forcebyte | IR[7:3] == 5'b1011_0);
 always @(posedge clk) begin
-    if (SC) begin 
-        L8 <= L8_next; 
-        L8_aux <= L8_aux_next; 
+    if (SC) begin
+        L8 <= L8_next;
+        L8_aux <= L8_aux_next;
     end
     if (ROME & ~stall & AR[8:5] == 4'b1000)   // INTR routine needs word operation
         L8_aux <= 1'b0;
@@ -568,14 +568,14 @@ always @(posedge clk) begin
         // Advance CR and set ROME
         ROME <= stall ? ROME : 1'b0;
         if (EXEC & ~RNI & ~stall) begin  // normal execution
-            ROME <= not_halted;        
+            ROME <= not_halted;
             CR <= CR + 4'b1;
         end
 
         // First cycle: load new instruction
-        if (FC) begin                           
+        if (FC) begin
             if (interrupt_request & ~delay_interrupt) begin
-                // On interrupt, go to 1r0000000.00ab 
+                // On interrupt, go to 1r0000000.00ab
                 // ab: 00 (trap), 01 (NMI), 10 (INTR)
                 {AR, CR} <= {9'b1_0000_0000, 2'b00, nmi_pending ? 2'b01 : 2'b10};  // INTR microcode address
                 IR <= 8'hCD;          // INT n
@@ -613,15 +613,15 @@ always @(posedge clk) begin
             writes_memory <= 1'b0;
             // Capture ModR/M now
             if (modrm_present) begin
-                automatic reg [4:0] M_expand, N_expand;
-                automatic reg [8:0] AR_updated;   // Instruction start AR including GRP345
+                reg [4:0] M_expand, N_expand;
+                reg [8:0] AR_updated;  // Instruction start AR including GRP345
                 // more decoding
-                writes_memory <= 
-                     q_bus[7:6] != 2'b11 & 
+                writes_memory <=
+                     q_bus[7:6] != 2'b11 &
                      (g_d & ~IR[1] |          // ALU Eb/Ev and MOV Eb/Ev
                      IR[7:2] == 6'b1000_00 |  // GRP1
                      ~g_2br_not & IR[7:6] == 2'b11 & g_w // C6h,C7h,GRP2,GRP3a,GRP3b,GRP4,GRP5
-                     );                     
+                     );
                 if (IR[7:1] == 7'b1111_011 && q_bus[5:4] != 2'b01) writes_memory <= 1'b0; // TEST/MUL/DIV in GRP3a/b, no memory write
                 if (IR == 8'hFF && q_bus[5:4] == 2'b10) writes_memory <= 1'b0; // JMP FAR rm
                 ea_uses_bp <= (q_bus[7:6] != 2'b11) &
@@ -642,7 +642,7 @@ always @(posedge clk) begin
                 if (SC & g_grp345) begin  // GRP3 -> F0h-F7h, GRP4,GRP5 -> F8h-FFh
                     AR_updated[2:0] = q_bus[5:3];
                     AR_updated[8] = IR[0];// MSB of AR should be IR[0] for group 3-5.
-                    CR <= 4'b0;      
+                    CR <= 4'b0;
                     ROME <= 1'b0;         // bubble as AR is changed
                 end
 
@@ -677,7 +677,7 @@ always @(posedge clk) begin
         end
         // Branches
         if (ROME & ~stall) begin
-            automatic reg taken;
+            reg taken;
             // Microcode execution: deal with jumps
             taken = 1'b0;
             if (T0 | T5 | T7) begin
@@ -692,7 +692,7 @@ always @(posedge clk) begin
                 6'b??1_111: taken = XC;    // XC
                 /// short jump only
                 6'b000_000: taken = ZF ^ F1Z; // F1ZZ
-                6'b000_001: taken = MOD1; 
+                6'b000_001: taken = MOD1;
                 6'b000_010: taken = L8;   // L8: byte instruction or B0-B7
                 6'b000_011: taken = ZF;   // Z
                 6'b000_100: taken = CNT != 4'd0; // NCZ, Not Counter Zero
@@ -756,11 +756,11 @@ end
 always @* begin
     case (IR[3:1])
     3'h0: XC = OF;
-    3'h1: XC = CF; 
-    3'h2: XC = ZF;  
+    3'h1: XC = CF;
+    3'h2: XC = ZF;
     3'h3: XC = CF | ZF;
-    3'h4: XC = SF; 
-    3'h5: XC = PF; 
+    3'h4: XC = SF;
+    3'h5: XC = PF;
     3'h6: XC = SF ^ OF;
     default: XC = (SF ^ OF) | ZF;
     endcase
@@ -769,8 +769,8 @@ end
 
 // Interrupt delay (8086 interrupt bug)
 always @(posedge clk) begin
-    if (SC & (g_prefix | 
-              IR[7:5] == 8'h17 |     // POP SS         
+    if (SC & (g_prefix |
+              IR[7:5] == 8'h17 |     // POP SS
               g_seg_reg_bits         // MOV sr,xxx
         )) delay_interrupt <= 1'b1;
     if (FC) delay_interrupt <= 1'b0; // clear delay after next instruction
@@ -819,7 +819,7 @@ always @(posedge clk) begin
         if (s_bus_rdy && uc_d == LOC_F) begin // setting F from s_bus
             F <= s_bus;
             // POPF sets fixed values for F[15:12], F[5], F[3], F[1]
-            F[5] <= 1'b0; F[3] <= 1'b0; F[1] <= 1'b1;   
+            F[5] <= 1'b0; F[3] <= 1'b0; F[1] <= 1'b1;
             F[15:12] <= popf_hi_is_f ? 4'hF : 4'h0;    // undefined bits differ in tests
         end
         if (CF1) F1 <= ~F1;      // Invert F1 flag
@@ -836,7 +836,7 @@ always @(posedge clk) begin
             F[8] <= 1'b0;
             F[9] <= 1'b0;
         end
-        if ((ALUOPC == ALU_LRCY || ALUOPC == ALU_RRCY) && uc_s == LOC_SIGMA) begin 
+        if ((ALUOPC == ALU_LRCY || ALUOPC == ALU_RRCY) && uc_s == LOC_SIGMA) begin
             F[0] <= F2[0];      // LRCY/RRCY updates CF when SIGMA is source. used in CORD
         end
     end
@@ -1030,9 +1030,9 @@ always @* begin
     2'b00: IND_next = IND_pre_update + 16'h2;  // P2
     2'b01: begin                               // BL
         if (DF) begin
-            IND_next = L8_aux ? IND_pre_update - 16'h1 : IND_pre_update - 16'h2;  
+            IND_next = L8_aux ? IND_pre_update - 16'h1 : IND_pre_update - 16'h2;
         end else begin
-            IND_next = L8_aux ? IND_pre_update + 16'h1 : IND_pre_update + 16'h2;  
+            IND_next = L8_aux ? IND_pre_update + 16'h1 : IND_pre_update + 16'h2;
         end
     end
     2'b10: IND_next = IND_pre_update - 16'h2;  // M2
@@ -1049,12 +1049,12 @@ function automatic [14:0] group_decode(input [7:0] ir);
     group_decode[1] = ir[7:6] == 2'h0 & ir[2] |
                       ir[7:6] == 2'h1 |
                       ir[7:4] == 4'h8 & (ir[3:1] == 3'h4 | ir[3:1] == 3'h6 | ir[3:0] == 4'hF) |
-                      ir[7:4] == 4'h9 | ir[7:5] == 3'h5 | 
+                      ir[7:4] == 4'h9 | ir[7:5] == 3'h5 |
                       ir[7:4] == 4'hC & ir[3:1] == 2'h3 |
                       ir[7:4] == 4'hE & ir[2] |
                       ir[7:4] == 4'hF & ir[2:1] != 2'h3;           // mod/rm w/read
     group_decode[2] = ir[7:4] == 4'hF & ir[2:1] == 2'h3;           // group 3/4/5 opcode
-    group_decode[3] = ir[7:5] == 3'h1 & ir[2:0] == 3'h6 | 
+    group_decode[3] = ir[7:5] == 3'h1 & ir[2:0] == 3'h6 |
                       ir[7:4] == 4'hF & ir[3:2] == 2'h0;           // prefix
     group_decode[4] = ir[7:6] == 2'h0 & ir[2] |
                       ir[7:6] == 2'h1 |
@@ -1063,7 +1063,7 @@ function automatic [14:0] group_decode(input [7:0] ir);
                       ir[7:4] == 4'hD & ir[3:2] == 2'h1 |
                       ir[7:4] == 4'hE |
                       ir[7:4] == 4'hF & ir[2:1] != 2'h3;           // 2BR (2 Byte Rom)
-    group_decode[5] = ~(ir[7:6] == 2'h0 & (~ir[2] | ir[2:1] == 2'h2) | 
+    group_decode[5] = ~(ir[7:6] == 2'h0 & (~ir[2] | ir[2:1] == 2'h2) |
                       ir[7:4] == 4'h8 & ~ir[3] |
                       ir[7:4] == 4'hD & ir[3:2] == 2'h0);          // special ALU op
     group_decode[6] = ir[7:4] == 4'hF & ir[3] & ir[2:1] != 2'h3;   // cond-code
@@ -1073,7 +1073,7 @@ function automatic [14:0] group_decode(input [7:0] ir);
     group_decode[8] = ir[7:4] == 4'h8 & ir[3:2] == 2'h3 & ~ir[0];  // seg reg bits
     group_decode[9] = ir[7:6] == 2'h0 & ~ir[2] |
                       ir[7:4] == 4'h8 & (ir[3:2] == 2'h2 | ir[3:2] == 2'h3 & ~ir[0]); // d bit
-    group_decode[10] = ir[7:5] == 3'h1 & ir[2:0] == 3'h6 | 
+    group_decode[10] = ir[7:5] == 3'h1 & ir[2:0] == 3'h6 |
                        ir[7:4] == 4'hF & ir[2:1] != 2'h3;          // 1BL (one byte logic)
     group_decode[11] = ir[7:6] == 2'h0 & ir[2:1] != 2'h3 |
                        ir[7:4] == 4'h8 & ir[3:2] != 2'h3 |
@@ -1086,7 +1086,7 @@ function automatic [14:0] group_decode(input [7:0] ir);
                        ir[7:4] == 4'hD & ir[3:2] == 2'h1;          // force-byte
     group_decode[13] = ir[7:4] == 4'h8 & ~ir[3] |
                        ir[7:4] == 4'hE & ~ir[2];                   // length from bit 1
-    group_decode[14] = ~(ir[7:6] == 2'h1 | 
+    group_decode[14] = ~(ir[7:6] == 2'h1 |
                        ir[7:4] == 4'hF & ir[3:1] == 3'h7);         // update carry
 endfunction
 
@@ -1124,18 +1124,18 @@ function [8:0] uaddr_pack;
     13'b0_1001_1000_00: uaddr_pack[8:2] = {5'h05, 2'b01};  // 010011000.00  CBW
     13'b0_1001_1001_00: uaddr_pack[8:2] = {5'h05, 2'b10};  // 010011001.00  CWD
     13'b0_1001_1001_01: uaddr_pack[8:2] = {5'h05, 2'b11};  // 010011001.01
-    
+
     13'b0_1010_000?_00: uaddr_pack[8:2] = {5'h06, 2'b00};  // 01010000?.00  MOV A,[i]
     13'b0_1010_001?_00: uaddr_pack[8:2] = {5'h06, 2'b01};  // 01010001?.00  MOV [i],A
     13'b?_1111_1011_00: uaddr_pack[8:2] = {5'h06, 2'b10};  // ?11111011.00   CALL FAR rm
     13'b?_1111_1011_01: uaddr_pack[8:2] = {5'h06, 2'b11};  // ?11111011.01  FARCALL2
-    
+
     13'b0_1001_1010_00: uaddr_pack[8:2] = {5'h07, 2'b00};  // 010011010.00  CALL cd
     13'b?_1111_1010_00: uaddr_pack[8:2] = {5'h07, 2'b01};  // ?11111010.00   CALL rm
     13'b?_1111_1010_01: uaddr_pack[8:2] = {5'h07, 2'b10};  // ?11111010.01
     13'b0_1110_1000_00: uaddr_pack[8:2] = {5'h07, 2'b11};  // 011101000.00  CALL cw
 
-    13'b0_1110_1000_01: uaddr_pack[8:2] = {5'h08, 2'b00};  // 
+    13'b0_1110_1000_01: uaddr_pack[8:2] = {5'h08, 2'b00};  //
     13'b0_1001_0???_00: uaddr_pack[8:2] = {5'h08, 2'b01};  // 010010???.00  XCHG AX,rw
     13'b0_1101_000?_00: uaddr_pack[8:2] = {5'h08, 2'b10};  // 01101000?.00  rot rm,1
     13'b0_1101_001?_00: uaddr_pack[8:2] = {5'h08, 2'b11};  // 01101001?.00  rot rm,CL
@@ -1266,55 +1266,63 @@ endfunction
 // disp_not: this instruction has no displacement
 // mem_read_not: this instruction does not read memory
 // return {AR, CR}
-function automatic [12:0] translate(input is_mem, input [4:0] mode_rm, input disp_not, input mem_read_not);
-    casez ({mode_rm, mem_read_not, is_mem, disp_not})
+function automatic [12:0] translate(
+    input        is_mem,
+    input  [4:0] mode_rm,
+    input        disp_not,
+    input        mem_read_not
+);
+    begin
+        translate = 13'b0;
+
+
+        casez ({mode_rm, mem_read_not, is_mem, disp_not})
     // Memory addressing: {mode[1:0], rm[2:0], ?, is_mem=1, ?}
-    8'b??000?1?: return 13'b101000000_0000;// 0x1d4 [BX+SI]
-    8'b??001?1?: return 13'b101000000_0110;// 0x1da [BX+DI]
-    8'b??010?1?: return 13'b101000000_0111;// 0x1db [BP+SI]
-    8'b??011?1?: return 13'b101000000_0011;// 0x1d7 [BP+DI]
-    8'b??100?1?: return 13'b010001011_0011;// 0x003 [SI]
-    8'b??101?1?: return 13'b010111111_0011;// 0x01f [DI]
-    8'b00110?1?: return 13'b101000000_1000;// 0x1dc [iw]
-    8'b01110?1?: return 13'b111111001_0011;// 0x023 [BP]
-    8'b10110?1?: return 13'b111111001_0011;// 0x023 [BP]
-    8'b??111?1?: return 13'b001011111_0011;// 0x037 [BX]
+        8'b??000?1?: translate = 13'b101000000_0000; // 0x1d4 [BX+SI]
+        8'b??001?1?: translate = 13'b101000000_0110; // 0x1da [BX+DI]
+        8'b??010?1?: translate = 13'b101000000_0111; // 0x1db [BP+SI]
+        8'b??011?1?: translate = 13'b101000000_0011; // 0x1d7 [BP+DI]
+        8'b??100?1?: translate = 13'b010001011_0011; // 0x003 [SI]
+        8'b??101?1?: translate = 13'b010111111_0011; // 0x01f [DI]
+        8'b00110?1?: translate = 13'b101000000_1000; // 0x1dc [iw]
+        8'b01110?1?: translate = 13'b111111001_0011; // 0x023 [BP]
+        8'b10110?1?: translate = 13'b111111001_0011; // 0x023 [BP]
+        8'b??111?1?: translate = 13'b001011111_0011; // 0x037 [BX]
 
-    // Far jump destinations: {is_call=0, dest[3:0], disp_needed, is_mem=0, mem_read}
-    8'b00000?0?: return 13'b111111011_0011;// 0x06b 0 FARCALL
-    8'b00001?0?: return 13'b111111010_0011;// 0x077 1 NEARCALL
-    8'b00010?0?: return 13'b011101011_0010;// 0x0d2 2 RELJMP
-    //   begin EAOFFSET entries:
-    8'b00011?00: return 13'b101000000_1010;// 0x1de 3 [i]
-    8'b00011001: return 13'b101000000_1101;// 0x1e1 3 EALOAD
-    8'b00011101: return 13'b101000000_1111;// 0x1e3 3 EADONE
-    //   end EAOFFSET entries
-    //   begin UNC EADONE
-    8'b0010000?: return 13'b101000000_1101;// 0x1e1 4 EALOAD  
-    8'b0010010?: return 13'b101000000_1111;// 0x1e3 4 EADONE
-    //   end   UNC EADONE
-    8'b00101?0?: return 13'b111111011_0100;// 0x06c 5 FARCALL2
-    8'b00110?0?: return 13'b100000000_0101;// 0x19d 6 INTR
-    8'b00111?0?: return 13'b100000000_1111;// 0x1a7 7 INT0
-    8'b01000?0?: return 13'b011010111_1100;// 0x118 8 RPTI
-    8'b01001?0?: return 13'b011010100_0101;// 0x179 9 AAEND
+        // Far jump destinations: {is_call=0, dest[3:0], disp_needed, is_mem=0, mem_read}
+        8'b00000?0?: translate = 13'b111111011_0011; // 0x06b 0 FARCALL
+        8'b00001?0?: translate = 13'b111111010_0011; // 0x077 1 NEARCALL
+        8'b00010?0?: translate = 13'b011101011_0010; // 0x0d2 2 RELJMP
+        //   begin EAOFFSET entries:
+        8'b00011?00: translate = 13'b101000000_1010; // 0x1de 3 [i]
+        8'b00011001: translate = 13'b101000000_1101; // 0x1e1 3 EALOAD
+        8'b00011101: translate = 13'b101000000_1111; // 0x1e3 3 EADONE
+        //   end EAOFFSET entries
+        //   begin UNC EADONE
+        8'b0010000?: translate = 13'b101000000_1101; // 0x1e1 4 EALOAD
+        8'b0010010?: translate = 13'b101000000_1111; // 0x1e3 4 EADONE
+        //   end   UNC EADONE
+        8'b00101?0?: translate = 13'b111111011_0100; // 0x06c 5 FARCALL2
+        8'b00110?0?: translate = 13'b100000000_0101; // 0x19d 6 INTR
+        8'b00111?0?: translate = 13'b100000000_1111; // 0x1a7 7 INT0
+        8'b01000?0?: translate = 13'b011010111_1100; // 0x118 8 RPTI
+        8'b01001?0?: translate = 13'b011010100_0101; // 0x179 9 AAEND
 
-    // Far call destinations: {is_call=1, dest[3:0], ?, is_mem=0, ?}
-    8'b10000?0?: return 13'b011001011_0010;// 0x0c2 0 FARRET
-    8'b10001?0?: return 13'b011010111_0110;// 0x112 1 RPTS
-    8'b10010?0?: return 13'b001001111_0011;// 0x17f 2 CORX
-    8'b10011?0?: return 13'b100100010_0000;// 0x188 3 CORD
-    8'b10100?0?: return 13'b100100011_1100;// 0x1c0 4 PREIMUL
-    8'b10101?0?: return 13'b100100011_0010;// 0x1b6 5 NEGATE
-    8'b10110?0?: return 13'b100100100_1001;// 0x1cd 6 IMULCOF
-    8'b10111?0?: return 13'b100100100_1110;// 0x1d2 7 MULCOF
-    8'b11000?0?: return 13'b100100011_0000;// 0x1b4 8 PREIDIV
-    8'b11001?0?: return 13'b100100100_0000;// 0x1c4 9 POSTIDIV
+        // Far call destinations: {is_call=1, dest[3:0], ?, is_mem=0, ?}
+        8'b10000?0?: translate = 13'b011001011_0010; // 0x0c2 0 FARRET
+        8'b10001?0?: translate = 13'b011010111_0110; // 0x112 1 RPTS
+        8'b10010?0?: translate = 13'b001001111_0011; // 0x17f 2 CORX
+        8'b10011?0?: translate = 13'b100100010_0000; // 0x188 3 CORD
+        8'b10100?0?: translate = 13'b100100011_1100; // 0x1c0 4 PREIMUL
+        8'b10101?0?: translate = 13'b100100011_0010; // 0x1b6 5 NEGATE
+        8'b10110?0?: translate = 13'b100100100_1001; // 0x1cd 6 IMULCOF
+        8'b10111?0?: translate = 13'b100100100_1110; // 0x1d2 7 MULCOF
+        8'b11000?0?: translate = 13'b100100011_0000; // 0x1b4 8 PREIDIV
+        8'b11001?0?: translate = 13'b100100100_0000; // 0x1c4 9 POSTIDIV
 
-    // 8'b??????0?: return 13'b111111111_1111;
-    // 8'b??????0?: return 13'b111111111_1111;
-    default: return 13'b0;
-    endcase
+        default:     translate = 13'b0;
+        endcase
+    end
 endfunction
 
 // Map “low 3 bits” + width into the 5-bit location code
@@ -1322,14 +1330,14 @@ function automatic [4:0] gpr_bus_code(input [2:0] rrr, input w, input axal);
     begin
         // This matches the S/D encoding
         // 11000 = AX, 01000 = AL, 10000 = AH, etc.
-        if (axal) 
+        if (axal)
             gpr_bus_code = {w, 4'b1000};
         else if (w)  // word registers: AX..DI
             gpr_bus_code = {2'b11, rrr};
         else    // byte registers: AL..BH
             gpr_bus_code = {rrr[2] ? 3'b100 : 3'b010, rrr[1:0]};
     end
-endfunction 
+endfunction
 
 `ifdef VERILATOR
 initial begin

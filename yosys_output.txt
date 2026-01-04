@@ -1,0 +1,1083 @@
+gojimmypi:/mnt/c/workspace/z8086-gojimmypi
+$ yosys -p "read_verilog -sv -DULX3S \
+    boards/ULX3S/top_ulx3s.sv \
+    boards/ULX3S/vram_ecp5.sv \
+    boards/ULX3S/pll_black_box.sv \
+    boards/ULX3S/ecp5_io_blackbox.sv \
+    src/z8086/alu.sv \
+    src/z8086/z8086.sv \
+    src/soc_hdmi/z8086hdmi.sv \
+    src/soc_hdmi/z8086soc.sv \
+    src/soc_hdmi/uart_simple.sv \
+    src/soc_hdmi/spram.sv \
+    src/soc_hdmi/sprom.sv \
+    src/soc_hdmi/hdmi/hdmi.sv \
+    src/soc_hdmi/hdmi/tmds_channel.sv \
+    src/soc_hdmi/hdmi/serializer.sv \
+    src/soc_hdmi/hdmi/packet_assembler.sv \
+    src/soc_hdmi/hdmi/packet_picker.sv \
+    src/soc_hdmi/hdmi/audio_sample_packet.sv \
+    src/soc_hdmi/hdmi/audio_info_frame.sv \
+    src/soc_hdmi/hdmi/audio_clock_regeneration_packet.sv \
+    src/soc_hdmi/hdmi/auxiliary_video_information_info_frame.sv \
+    src/soc_hdmi/hdmi/source_product_description_info_frame.sv ; \
+    hierarchy -top top -check ; \
+    stat"
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2025  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.60+70 (git sha1 8101c87fa, g++ 11.4.0-1ubuntu1~22.04 -fPIC -O3)
+
+-- Running command `read_verilog -sv -DULX3S     boards/ULX3S/top_ulx3s.sv     boards/ULX3S/vram_ecp5.sv     boards/ULX3S/pll_black_box.sv     boards/ULX3S/ecp5_io_blackbox.sv     src/z8086/alu.sv     src/z8086/z8086.sv     src/soc_hdmi/z8086hdmi.sv     src/soc_hdmi/z8086soc.sv     src/soc_hdmi/uart_simple.sv     src/soc_hdmi/spram.sv     src/soc_hdmi/sprom.sv     src/soc_hdmi/hdmi/hdmi.sv     src/soc_hdmi/hdmi/tmds_channel.sv     src/soc_hdmi/hdmi/serializer.sv     src/soc_hdmi/hdmi/packet_assembler.sv     src/soc_hdmi/hdmi/packet_picker.sv     src/soc_hdmi/hdmi/audio_sample_packet.sv     src/soc_hdmi/hdmi/audio_info_frame.sv     src/soc_hdmi/hdmi/audio_clock_regeneration_packet.sv     src/soc_hdmi/hdmi/auxiliary_video_information_info_frame.sv     src/soc_hdmi/hdmi/source_product_description_info_frame.sv ;     hierarchy -top top -check ;     stat' --
+
+1. Executing Verilog-2005 frontend: boards/ULX3S/top_ulx3s.sv
+Parsing SystemVerilog input from `boards/ULX3S/top_ulx3s.sv' to AST representation.
+verilog frontend filename boards/ULX3S/top_ulx3s.sv
+Generating RTLIL representation for module `\top'.
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: boards/ULX3S/vram_ecp5.sv
+Parsing SystemVerilog input from `boards/ULX3S/vram_ecp5.sv' to AST representation.
+verilog frontend filename boards/ULX3S/vram_ecp5.sv
+Generating RTLIL representation for module `\vram_ecp5'.
+Successfully finished Verilog frontend.
+
+3. Executing Verilog-2005 frontend: boards/ULX3S/pll_black_box.sv
+Parsing SystemVerilog input from `boards/ULX3S/pll_black_box.sv' to AST representation.
+verilog frontend filename boards/ULX3S/pll_black_box.sv
+Generating RTLIL representation for module `\pll27'.
+Generating RTLIL representation for module `\pll74'.
+Successfully finished Verilog frontend.
+
+4. Executing Verilog-2005 frontend: boards/ULX3S/ecp5_io_blackbox.sv
+Parsing SystemVerilog input from `boards/ULX3S/ecp5_io_blackbox.sv' to AST representation.
+verilog frontend filename boards/ULX3S/ecp5_io_blackbox.sv
+Generating RTLIL representation for module `\OBUFDS'.
+Generating RTLIL representation for module `\ODDRX1F'.
+Successfully finished Verilog frontend.
+
+5. Executing Verilog-2005 frontend: src/z8086/alu.sv
+Parsing SystemVerilog input from `src/z8086/alu.sv' to AST representation.
+verilog frontend filename src/z8086/alu.sv
+Generating RTLIL representation for module `\alu'.
+Successfully finished Verilog frontend.
+
+6. Executing Verilog-2005 frontend: src/z8086/z8086.sv
+Parsing SystemVerilog input from `src/z8086/z8086.sv' to AST representation.
+verilog frontend filename src/z8086/z8086.sv
+Generating RTLIL representation for module `\z8086'.
+Successfully finished Verilog frontend.
+
+7. Executing Verilog-2005 frontend: src/soc_hdmi/z8086hdmi.sv
+Parsing SystemVerilog input from `src/soc_hdmi/z8086hdmi.sv' to AST representation.
+verilog frontend filename src/soc_hdmi/z8086hdmi.sv
+Generating RTLIL representation for module `\z8086hdmi'.
+src/soc_hdmi/z8086hdmi.sv:362: Warning: Replacing floating point parameter hdmi.VIDEO_REFRESH_RATE = 60.000000 with string.
+Successfully finished Verilog frontend.
+
+8. Executing Verilog-2005 frontend: src/soc_hdmi/z8086soc.sv
+Parsing SystemVerilog input from `src/soc_hdmi/z8086soc.sv' to AST representation.
+verilog frontend filename src/soc_hdmi/z8086soc.sv
+Generating RTLIL representation for module `\z8086soc'.
+Successfully finished Verilog frontend.
+
+9. Executing Verilog-2005 frontend: src/soc_hdmi/uart_simple.sv
+Parsing SystemVerilog input from `src/soc_hdmi/uart_simple.sv' to AST representation.
+verilog frontend filename src/soc_hdmi/uart_simple.sv
+Generating RTLIL representation for module `\uart_simple'.
+Successfully finished Verilog frontend.
+
+10. Executing Verilog-2005 frontend: src/soc_hdmi/spram.sv
+Parsing SystemVerilog input from `src/soc_hdmi/spram.sv' to AST representation.
+verilog frontend filename src/soc_hdmi/spram.sv
+Generating RTLIL representation for module `\spram'.
+Successfully finished Verilog frontend.
+
+11. Executing Verilog-2005 frontend: src/soc_hdmi/sprom.sv
+Parsing SystemVerilog input from `src/soc_hdmi/sprom.sv' to AST representation.
+verilog frontend filename src/soc_hdmi/sprom.sv
+Generating RTLIL representation for module `\sprom'.
+Warning: sprom instantiated without init_file
+Warning: sprom instantiated without init_file
+Successfully finished Verilog frontend.
+
+12. Executing Verilog-2005 frontend: src/soc_hdmi/hdmi/hdmi.sv
+Parsing SystemVerilog input from `src/soc_hdmi/hdmi/hdmi.sv' to AST representation.
+verilog frontend filename src/soc_hdmi/hdmi/hdmi.sv
+Generating RTLIL representation for module `\hdmi'.
+Warning: Replacing memory \audio_sample_word_arr with list of registers. See src/soc_hdmi/hdmi/hdmi.sv:107
+src/soc_hdmi/hdmi/hdmi.sv:429: Warning: Replacing floating point parameter serializer.VIDEO_RATE = 25174825.174825 with string.
+src/soc_hdmi/hdmi/hdmi.sv:329: Warning: Replacing floating point parameter true_hdmi_output.packet_picker.VIDEO_RATE = 25174825.174825 with string.
+Successfully finished Verilog frontend.
+
+13. Executing Verilog-2005 frontend: src/soc_hdmi/hdmi/tmds_channel.sv
+Parsing SystemVerilog input from `src/soc_hdmi/hdmi/tmds_channel.sv' to AST representation.
+verilog frontend filename src/soc_hdmi/hdmi/tmds_channel.sv
+Generating RTLIL representation for module `\tmds_channel'.
+Successfully finished Verilog frontend.
+
+14. Executing Verilog-2005 frontend: src/soc_hdmi/hdmi/serializer.sv
+Parsing SystemVerilog input from `src/soc_hdmi/hdmi/serializer.sv' to AST representation.
+verilog frontend filename src/soc_hdmi/hdmi/serializer.sv
+Generating RTLIL representation for module `\serializer'.
+Warning: Replacing memory \tmds_reversed with list of registers. See src/soc_hdmi/hdmi/serializer.sv:48
+Warning: Replacing memory \tmds_internal_arr with list of registers. See src/soc_hdmi/hdmi/serializer.sv:31
+Warning: Replacing memory \tmds_shift with list of registers. See src/soc_hdmi/hdmi/serializer.sv:82, src/soc_hdmi/hdmi/serializer.sv:74
+Successfully finished Verilog frontend.
+
+15. Executing Verilog-2005 frontend: src/soc_hdmi/hdmi/packet_assembler.sv
+Parsing SystemVerilog input from `src/soc_hdmi/hdmi/packet_assembler.sv' to AST representation.
+verilog frontend filename src/soc_hdmi/hdmi/packet_assembler.sv
+Generating RTLIL representation for module `\packet_assembler'.
+Warning: Replacing memory \parity_next_next with list of registers. See src/soc_hdmi/hdmi/packet_assembler.sv:88
+Warning: Replacing memory \parity_next with list of registers. See src/soc_hdmi/hdmi/packet_assembler.sv:87
+Warning: Replacing memory \sub_arr with list of registers. See src/soc_hdmi/hdmi/packet_assembler.sv:24
+Warning: Replacing memory \parity with list of registers. See src/soc_hdmi/hdmi/packet_assembler.sv:97
+Successfully finished Verilog frontend.
+
+16. Executing Verilog-2005 frontend: src/soc_hdmi/hdmi/packet_picker.sv
+Parsing SystemVerilog input from `src/soc_hdmi/hdmi/packet_picker.sv' to AST representation.
+verilog frontend filename src/soc_hdmi/hdmi/packet_picker.sv
+Generating RTLIL representation for module `\packet_picker'.
+src/soc_hdmi/hdmi/packet_picker.sv:55: Warning: Replacing floating point parameter u_acr.VIDEO_RATE = 0.000000 with string.
+src/soc_hdmi/hdmi/packet_picker.sv:136: Warning: Range [24:23] select out of bounds on signal `$mem2bits$\audio_sample_word_buffer$src/soc_hdmi/hdmi/packet_picker.sv:136$11595': Setting 1 MSB bits to undef.
+src/soc_hdmi/hdmi/packet_picker.sv:137: Warning: Range [24:23] select out of bounds on signal `$mem2bits$\audio_sample_word_buffer$src/soc_hdmi/hdmi/packet_picker.sv:137$11596': Setting 1 MSB bits to undef.
+Successfully finished Verilog frontend.
+
+17. Executing Verilog-2005 frontend: src/soc_hdmi/hdmi/audio_sample_packet.sv
+Parsing SystemVerilog input from `src/soc_hdmi/hdmi/audio_sample_packet.sv' to AST representation.
+verilog frontend filename src/soc_hdmi/hdmi/audio_sample_packet.sv
+Generating RTLIL representation for module `\audio_sample_packet'.
+Successfully finished Verilog frontend.
+
+18. Executing Verilog-2005 frontend: src/soc_hdmi/hdmi/audio_info_frame.sv
+Parsing SystemVerilog input from `src/soc_hdmi/hdmi/audio_info_frame.sv' to AST representation.
+verilog frontend filename src/soc_hdmi/hdmi/audio_info_frame.sv
+Generating RTLIL representation for module `\audio_info_frame'.
+Successfully finished Verilog frontend.
+
+19. Executing Verilog-2005 frontend: src/soc_hdmi/hdmi/audio_clock_regeneration_packet.sv
+Parsing SystemVerilog input from `src/soc_hdmi/hdmi/audio_clock_regeneration_packet.sv' to AST representation.
+verilog frontend filename src/soc_hdmi/hdmi/audio_clock_regeneration_packet.sv
+Generating RTLIL representation for module `\audio_clock_regeneration_packet'.
+Successfully finished Verilog frontend.
+
+20. Executing Verilog-2005 frontend: src/soc_hdmi/hdmi/auxiliary_video_information_info_frame.sv
+Parsing SystemVerilog input from `src/soc_hdmi/hdmi/auxiliary_video_information_info_frame.sv' to AST representation.
+verilog frontend filename src/soc_hdmi/hdmi/auxiliary_video_information_info_frame.sv
+Generating RTLIL representation for module `\auxiliary_video_information_info_frame'.
+Successfully finished Verilog frontend.
+
+21. Executing Verilog-2005 frontend: src/soc_hdmi/hdmi/source_product_description_info_frame.sv
+Parsing SystemVerilog input from `src/soc_hdmi/hdmi/source_product_description_info_frame.sv' to AST representation.
+verilog frontend filename src/soc_hdmi/hdmi/source_product_description_info_frame.sv
+Generating RTLIL representation for module `\source_product_description_info_frame'.
+Successfully finished Verilog frontend.
+
+22. Executing HIERARCHY pass (managing design hierarchy).
+
+22.1. Analyzing design hierarchy..
+Top module:  \top
+Used module:     \z8086soc
+Used module:         \uart_simple
+Used module:         \z8086hdmi
+Used module:             \hdmi
+Used module:                 \tmds_channel
+Used module:                 \packet_assembler
+Used module:                 \packet_picker
+Used module:                     \audio_info_frame
+Used module:                     \source_product_description_info_frame
+Used module:                     \auxiliary_video_information_info_frame
+Used module:                     \audio_sample_packet
+Used module:                     \audio_clock_regeneration_packet
+Used module:                 \serializer
+Used module:             \sprom
+Used module:             \vram_ecp5
+Used module:         \spram
+Used module:         \z8086
+Used module:             \alu
+Parameter \width = 8
+Parameter \widthad = 17
+Parameter \init_file = 96'011100110110111101100011010111110110100001100100011011010110100100101110011010000110010101111000
+
+22.2. Executing AST frontend in derive mode using pre-parsed AST for module `\spram'.
+Parameter \width = 8
+Parameter \widthad = 17
+Parameter \init_file = 96'011100110110111101100011010111110110100001100100011011010110100100101110011010000110010101111000
+Generating RTLIL representation for module `$paramod$48529384c1d70e3935c19effcfeecab99938daa8\spram'.
+Parameter \VIDEO_ID_CODE = 4
+Parameter \IT_CONTENT = 1
+Parameter \DVI_OUTPUT = 0
+Parameter \VIDEO_REFRESH_RATE = 72'001101100011000000101110001100000011000000110000001100000011000000110000
+Parameter \AUDIO_RATE = 48000
+Parameter \AUDIO_BIT_WIDTH = 16
+Parameter \START_X = 0
+Parameter \START_Y = 0
+
+22.3. Executing AST frontend in derive mode using pre-parsed AST for module `\hdmi'.
+Parameter \VIDEO_ID_CODE = 4
+Parameter \IT_CONTENT = 1
+Parameter \DVI_OUTPUT = 0
+Parameter \VIDEO_REFRESH_RATE = 72'001101100011000000101110001100000011000000110000001100000011000000110000
+Parameter \AUDIO_RATE = 48000
+Parameter \AUDIO_BIT_WIDTH = 16
+Parameter \START_X = 0
+Parameter \START_Y = 0
+Generating RTLIL representation for module `$paramod$901da6f9edb7f22ba139f26087f592badc570823\hdmi'.
+Warning: Replacing memory \audio_sample_word_arr with list of registers. See src/soc_hdmi/hdmi/hdmi.sv:107
+src/soc_hdmi/hdmi/hdmi.sv:429: Warning: Replacing floating point parameter serializer.VIDEO_RATE = 74250000.000000 with string.
+src/soc_hdmi/hdmi/hdmi.sv:329: Warning: Replacing floating point parameter true_hdmi_output.packet_picker.VIDEO_RATE = 74250000.000000 with string.
+Parameter \width = 8
+Parameter \widthad = 12
+Parameter \init_file = 96'011001100110111101101110011101000011011001111000001100010011001000101110011010000110010101111000
+
+22.4. Executing AST frontend in derive mode using pre-parsed AST for module `\sprom'.
+Parameter \width = 8
+Parameter \widthad = 12
+Parameter \init_file = 96'011001100110111101101110011101000011011001111000001100010011001000101110011010000110010101111000
+Generating RTLIL representation for module `$paramod$3a017fecfeb286358e44f3d59fb517a699c8e687\sprom'.
+Parameter \DATA_W = 16
+Parameter \ADDR_W = 12
+Parameter \DEPTH = 2400
+Parameter \INIT_FILE = 184'0110001001101111011000010111001001100100011100110010111101010101010011000101100000110011010100110010111101110011011000110111001001100101011001010110111000101110011010000110010101111000
+
+22.5. Executing AST frontend in derive mode using pre-parsed AST for module `\vram_ecp5'.
+Parameter \DATA_W = 16
+Parameter \ADDR_W = 12
+Parameter \DEPTH = 2400
+Parameter \INIT_FILE = 184'0110001001101111011000010111001001100100011100110010111101010101010011000101100000110011010100110010111101110011011000110111001001100101011001010110111000101110011010000110010101111000
+Generating RTLIL representation for module `$paramod$fc6d69e38d228916313d1d46676b6b282e4b262e\vram_ecp5'.
+Parameter \CN = 2
+
+22.6. Executing AST frontend in derive mode using pre-parsed AST for module `\tmds_channel'.
+Parameter \CN = 2
+Generating RTLIL representation for module `$paramod\tmds_channel\CN=s32'00000000000000000000000000000010'.
+Parameter \CN = 1
+
+22.7. Executing AST frontend in derive mode using pre-parsed AST for module `\tmds_channel'.
+Parameter \CN = 1
+Generating RTLIL representation for module `$paramod\tmds_channel\CN=s32'00000000000000000000000000000001'.
+Parameter \CN = 0
+
+22.8. Executing AST frontend in derive mode using pre-parsed AST for module `\tmds_channel'.
+Parameter \CN = 0
+Generating RTLIL representation for module `$paramod\tmds_channel\CN=s32'00000000000000000000000000000000'.
+Parameter \VIDEO_ID_CODE = 1
+Parameter \VIDEO_RATE = 120'001100100011010100110001001101110011010000111000001100100011010100101110001100010011011100110100001110000011001000110101
+Parameter \IT_CONTENT = 1'1
+Parameter \AUDIO_BIT_WIDTH = 16
+Parameter \AUDIO_RATE = 44100
+Parameter \VENDOR_NAME = 64'0101010101101110011010110110111001101111011101110110111000000000
+Parameter \PRODUCT_DESCRIPTION = 128'01000110010100000100011101000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+Parameter \SOURCE_DEVICE_INFORMATION = 8'00000000
+
+22.9. Executing AST frontend in derive mode using pre-parsed AST for module `\packet_picker'.
+Parameter \VIDEO_ID_CODE = 1
+Parameter \VIDEO_RATE = 120'001100100011010100110001001101110011010000111000001100100011010100101110001100010011011100110100001110000011001000110101
+Parameter \IT_CONTENT = 1'1
+Parameter \AUDIO_BIT_WIDTH = 16
+Parameter \AUDIO_RATE = 44100
+Parameter \VENDOR_NAME = 64'0101010101101110011010110110111001101111011101110110111000000000
+Parameter \PRODUCT_DESCRIPTION = 128'01000110010100000100011101000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+Parameter \SOURCE_DEVICE_INFORMATION = 8'00000000
+Generating RTLIL representation for module `$paramod$58e1ab6fed64c0eea8102b55d653070f0246ccd1\packet_picker'.
+src/soc_hdmi/hdmi/packet_picker.sv:55: Warning: Replacing floating point parameter u_acr.VIDEO_RATE = 25174825.174825 with string.
+Parameter \NUM_CHANNELS = 3
+Parameter \VIDEO_RATE = 120'001100100011010100110001001101110011010000111000001100100011010100101110001100010011011100110100001110000011001000110101
+
+22.10. Executing AST frontend in derive mode using pre-parsed AST for module `\serializer'.
+Parameter \NUM_CHANNELS = 3
+Parameter \VIDEO_RATE = 120'001100100011010100110001001101110011010000111000001100100011010100101110001100010011011100110100001110000011001000110101
+Generating RTLIL representation for module `$paramod$ceaa779ccfb1617d562266555df3b011d1aae697\serializer'.
+Warning: Replacing memory \tmds_reversed with list of registers. See src/soc_hdmi/hdmi/serializer.sv:48
+Warning: Replacing memory \tmds_internal_arr with list of registers. See src/soc_hdmi/hdmi/serializer.sv:31
+Warning: Replacing memory \tmds_shift with list of registers. See src/soc_hdmi/hdmi/serializer.sv:82, src/soc_hdmi/hdmi/serializer.sv:74
+Reprocessing module hdmi because instantiated module tmds_channel has become available.
+Generating RTLIL representation for module `\hdmi'.
+Warning: Replacing memory \tmds_internal with list of registers. See src/soc_hdmi/hdmi/hdmi.sv:413
+Warning: Replacing memory \audio_sample_word_arr with list of registers. See src/soc_hdmi/hdmi/hdmi.sv:107
+src/soc_hdmi/hdmi/hdmi.sv:429: Warning: Replacing floating point parameter serializer.VIDEO_RATE = 25174825.174825 with string.
+src/soc_hdmi/hdmi/hdmi.sv:329: Warning: Replacing floating point parameter true_hdmi_output.packet_picker.VIDEO_RATE = 25174825.174825 with string.
+Parameter \VENDOR_NAME = 64'0000000000000000000000000000000000000000000000000000000000000000
+Parameter \PRODUCT_DESCRIPTION = 128'00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+Parameter \SOURCE_DEVICE_INFORMATION = 8'00000000
+
+22.11. Executing AST frontend in derive mode using pre-parsed AST for module `\source_product_description_info_frame'.
+Parameter \VENDOR_NAME = 64'0000000000000000000000000000000000000000000000000000000000000000
+Parameter \PRODUCT_DESCRIPTION = 128'00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+Parameter \SOURCE_DEVICE_INFORMATION = 8'00000000
+Generating RTLIL representation for module `$paramod$bccc2f67f2b3ff6d634a697ff55129270b80b6eb\source_product_description_info_frame'.
+Parameter \VIDEO_ID_CODE = 7'0000100
+Parameter \IT_CONTENT = 1'0
+
+22.12. Executing AST frontend in derive mode using pre-parsed AST for module `\auxiliary_video_information_info_frame'.
+Parameter \VIDEO_ID_CODE = 7'0000100
+Parameter \IT_CONTENT = 1'0
+Generating RTLIL representation for module `$paramod\auxiliary_video_information_info_frame\VIDEO_ID_CODE=7'0000100\IT_CONTENT=1'0'.
+Parameter \SAMPLING_FREQUENCY = 4'0000
+Parameter \WORD_LENGTH = 4'1000
+
+22.13. Executing AST frontend in derive mode using pre-parsed AST for module `\audio_sample_packet'.
+Parameter \SAMPLING_FREQUENCY = 4'0000
+Parameter \WORD_LENGTH = 4'1000
+Generating RTLIL representation for module `$paramod\audio_sample_packet\SAMPLING_FREQUENCY=4'0000\WORD_LENGTH=4'1000'.
+Parameter \VIDEO_RATE = 64'0011000000101110001100000011000000110000001100000011000000110000
+Parameter \AUDIO_RATE = 0
+
+22.14. Executing AST frontend in derive mode using pre-parsed AST for module `\audio_clock_regeneration_packet'.
+Parameter \VIDEO_RATE = 64'0011000000101110001100000011000000110000001100000011000000110000
+Parameter \AUDIO_RATE = 0
+Generating RTLIL representation for module `$paramod$ecd83189f5e32d48e1465dd6e2abd70dacffc182\audio_clock_regeneration_packet'.
+
+22.15. Analyzing design hierarchy..
+Top module:  \top
+Used module:     \z8086soc
+Used module:         \uart_simple
+Used module:         \z8086hdmi
+Used module:             $paramod$901da6f9edb7f22ba139f26087f592badc570823\hdmi
+Used module:                 \tmds_channel
+Used module:                 \packet_assembler
+Used module:                 \packet_picker
+Used module:                     \audio_info_frame
+Used module:                     $paramod$bccc2f67f2b3ff6d634a697ff55129270b80b6eb\source_product_description_info_frame
+Used module:                     $paramod\auxiliary_video_information_info_frame\VIDEO_ID_CODE=7'0000100\IT_CONTENT=1'0
+Used module:                     $paramod\audio_sample_packet\SAMPLING_FREQUENCY=4'0000\WORD_LENGTH=4'1000
+Used module:                     $paramod$ecd83189f5e32d48e1465dd6e2abd70dacffc182\audio_clock_regeneration_packet
+Used module:                 \serializer
+Used module:             $paramod$3a017fecfeb286358e44f3d59fb517a699c8e687\sprom
+Used module:             $paramod$fc6d69e38d228916313d1d46676b6b282e4b262e\vram_ecp5
+Used module:         $paramod$48529384c1d70e3935c19effcfeecab99938daa8\spram
+Used module:         \z8086
+Used module:             \alu
+Parameter \CN = 2
+Found cached RTLIL representation for module `$paramod\tmds_channel\CN=s32'00000000000000000000000000000010'.
+Parameter \CN = 1
+Found cached RTLIL representation for module `$paramod\tmds_channel\CN=s32'00000000000000000000000000000001'.
+Parameter \CN = 0
+Found cached RTLIL representation for module `$paramod\tmds_channel\CN=s32'00000000000000000000000000000000'.
+Parameter \VIDEO_ID_CODE = 4
+Parameter \VIDEO_RATE = 120'001101110011010000110010001101010011000000110000001100000011000000101110001100000011000000110000001100000011000000110000
+Parameter \IT_CONTENT = 1'1
+Parameter \AUDIO_BIT_WIDTH = 16
+Parameter \AUDIO_RATE = 48000
+Parameter \VENDOR_NAME = 64'0101010101101110011010110110111001101111011101110110111000000000
+Parameter \PRODUCT_DESCRIPTION = 128'01000110010100000100011101000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+Parameter \SOURCE_DEVICE_INFORMATION = 8'00000000
+
+22.16. Executing AST frontend in derive mode using pre-parsed AST for module `\packet_picker'.
+Parameter \VIDEO_ID_CODE = 4
+Parameter \VIDEO_RATE = 120'001101110011010000110010001101010011000000110000001100000011000000101110001100000011000000110000001100000011000000110000
+Parameter \IT_CONTENT = 1'1
+Parameter \AUDIO_BIT_WIDTH = 16
+Parameter \AUDIO_RATE = 48000
+Parameter \VENDOR_NAME = 64'0101010101101110011010110110111001101111011101110110111000000000
+Parameter \PRODUCT_DESCRIPTION = 128'01000110010100000100011101000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+Parameter \SOURCE_DEVICE_INFORMATION = 8'00000000
+Generating RTLIL representation for module `$paramod$5c4e3bf47ea240664332b1e79d0c8526c28d5529\packet_picker'.
+src/soc_hdmi/hdmi/packet_picker.sv:55: Warning: Replacing floating point parameter u_acr.VIDEO_RATE = 74250000.000000 with string.
+Parameter \NUM_CHANNELS = 3
+Parameter \VIDEO_RATE = 120'001101110011010000110010001101010011000000110000001100000011000000101110001100000011000000110000001100000011000000110000
+
+22.17. Executing AST frontend in derive mode using pre-parsed AST for module `\serializer'.
+Parameter \NUM_CHANNELS = 3
+Parameter \VIDEO_RATE = 120'001101110011010000110010001101010011000000110000001100000011000000101110001100000011000000110000001100000011000000110000
+Generating RTLIL representation for module `$paramod$d2f1ea176df49eb62beb5db06ab25170a297a667\serializer'.
+Warning: Replacing memory \tmds_reversed with list of registers. See src/soc_hdmi/hdmi/serializer.sv:48
+Warning: Replacing memory \tmds_internal_arr with list of registers. See src/soc_hdmi/hdmi/serializer.sv:31
+Warning: Replacing memory \tmds_shift with list of registers. See src/soc_hdmi/hdmi/serializer.sv:82, src/soc_hdmi/hdmi/serializer.sv:74
+Reprocessing module $paramod$901da6f9edb7f22ba139f26087f592badc570823\hdmi because instantiated module $paramod\tmds_channel\CN=s32'00000000000000000000000000000010 has become available.
+Generating RTLIL representation for module `$paramod$901da6f9edb7f22ba139f26087f592badc570823\hdmi'.
+Warning: Replacing memory \tmds_internal with list of registers. See src/soc_hdmi/hdmi/hdmi.sv:413
+Warning: Replacing memory \audio_sample_word_arr with list of registers. See src/soc_hdmi/hdmi/hdmi.sv:107
+src/soc_hdmi/hdmi/hdmi.sv:429: Warning: Replacing floating point parameter serializer.VIDEO_RATE = 74250000.000000 with string.
+src/soc_hdmi/hdmi/hdmi.sv:329: Warning: Replacing floating point parameter true_hdmi_output.packet_picker.VIDEO_RATE = 74250000.000000 with string.
+
+22.18. Analyzing design hierarchy..
+Top module:  \top
+Used module:     \z8086soc
+Used module:         \uart_simple
+Used module:         \z8086hdmi
+Used module:             $paramod$901da6f9edb7f22ba139f26087f592badc570823\hdmi
+Used module:                 \tmds_channel
+Used module:                 \packet_assembler
+Used module:                 \packet_picker
+Used module:                     \audio_info_frame
+Used module:                     $paramod$bccc2f67f2b3ff6d634a697ff55129270b80b6eb\source_product_description_info_frame
+Used module:                     $paramod\auxiliary_video_information_info_frame\VIDEO_ID_CODE=7'0000100\IT_CONTENT=1'0
+Used module:                     $paramod\audio_sample_packet\SAMPLING_FREQUENCY=4'0000\WORD_LENGTH=4'1000
+Used module:                     $paramod$ecd83189f5e32d48e1465dd6e2abd70dacffc182\audio_clock_regeneration_packet
+Used module:                 \serializer
+Used module:             $paramod$3a017fecfeb286358e44f3d59fb517a699c8e687\sprom
+Used module:             $paramod$fc6d69e38d228916313d1d46676b6b282e4b262e\vram_ecp5
+Used module:         $paramod$48529384c1d70e3935c19effcfeecab99938daa8\spram
+Used module:         \z8086
+Used module:             \alu
+Parameter \CN = 2
+Found cached RTLIL representation for module `$paramod\tmds_channel\CN=s32'00000000000000000000000000000010'.
+Parameter \CN = 1
+Found cached RTLIL representation for module `$paramod\tmds_channel\CN=s32'00000000000000000000000000000001'.
+Parameter \CN = 0
+Found cached RTLIL representation for module `$paramod\tmds_channel\CN=s32'00000000000000000000000000000000'.
+Parameter \VIDEO_ID_CODE = 4
+Parameter \VIDEO_RATE = 120'001101110011010000110010001101010011000000110000001100000011000000101110001100000011000000110000001100000011000000110000
+Parameter \IT_CONTENT = 1'1
+Parameter \AUDIO_BIT_WIDTH = 16
+Parameter \AUDIO_RATE = 48000
+Parameter \VENDOR_NAME = 64'0101010101101110011010110110111001101111011101110110111000000000
+Parameter \PRODUCT_DESCRIPTION = 128'01000110010100000100011101000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+Parameter \SOURCE_DEVICE_INFORMATION = 8'00000000
+Found cached RTLIL representation for module `$paramod$5c4e3bf47ea240664332b1e79d0c8526c28d5529\packet_picker'.
+Parameter \NUM_CHANNELS = 3
+Parameter \VIDEO_RATE = 120'001101110011010000110010001101010011000000110000001100000011000000101110001100000011000000110000001100000011000000110000
+Found cached RTLIL representation for module `$paramod$d2f1ea176df49eb62beb5db06ab25170a297a667\serializer'.
+
+22.19. Analyzing design hierarchy..
+Top module:  \top
+Used module:     \z8086soc
+Used module:         \uart_simple
+Used module:         \z8086hdmi
+Used module:             $paramod$901da6f9edb7f22ba139f26087f592badc570823\hdmi
+Used module:                 $paramod\tmds_channel\CN=s32'00000000000000000000000000000010
+Used module:                 $paramod\tmds_channel\CN=s32'00000000000000000000000000000001
+Used module:                 $paramod\tmds_channel\CN=s32'00000000000000000000000000000000
+Used module:                 \packet_assembler
+Used module:                 $paramod$5c4e3bf47ea240664332b1e79d0c8526c28d5529\packet_picker
+Used module:                     \audio_info_frame
+Used module:                     \source_product_description_info_frame
+Used module:                     \auxiliary_video_information_info_frame
+Used module:                     \audio_sample_packet
+Used module:                     \audio_clock_regeneration_packet
+Used module:                 $paramod$d2f1ea176df49eb62beb5db06ab25170a297a667\serializer
+Used module:             $paramod$3a017fecfeb286358e44f3d59fb517a699c8e687\sprom
+Used module:             $paramod$fc6d69e38d228916313d1d46676b6b282e4b262e\vram_ecp5
+Used module:         $paramod$48529384c1d70e3935c19effcfeecab99938daa8\spram
+Used module:         \z8086
+Used module:             \alu
+Parameter \VENDOR_NAME = 64'0101010101101110011010110110111001101111011101110110111000000000
+Parameter \PRODUCT_DESCRIPTION = 128'01000110010100000100011101000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+Parameter \SOURCE_DEVICE_INFORMATION = 8'00000000
+
+22.20. Executing AST frontend in derive mode using pre-parsed AST for module `\source_product_description_info_frame'.
+Parameter \VENDOR_NAME = 64'0101010101101110011010110110111001101111011101110110111000000000
+Parameter \PRODUCT_DESCRIPTION = 128'01000110010100000100011101000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+Parameter \SOURCE_DEVICE_INFORMATION = 8'00000000
+Generating RTLIL representation for module `$paramod$47a0a978ff1011d061114387ba827cec1525970f\source_product_description_info_frame'.
+Parameter \VIDEO_ID_CODE = 7'0000100
+Parameter \IT_CONTENT = 1'1
+
+22.21. Executing AST frontend in derive mode using pre-parsed AST for module `\auxiliary_video_information_info_frame'.
+Parameter \VIDEO_ID_CODE = 7'0000100
+Parameter \IT_CONTENT = 1'1
+Generating RTLIL representation for module `$paramod\auxiliary_video_information_info_frame\VIDEO_ID_CODE=7'0000100\IT_CONTENT=1'1'.
+Parameter \SAMPLING_FREQUENCY = 4'0010
+Parameter \WORD_LENGTH = 4'1000
+
+22.22. Executing AST frontend in derive mode using pre-parsed AST for module `\audio_sample_packet'.
+Parameter \SAMPLING_FREQUENCY = 4'0010
+Parameter \WORD_LENGTH = 4'1000
+Generating RTLIL representation for module `$paramod\audio_sample_packet\SAMPLING_FREQUENCY=4'0010\WORD_LENGTH=4'1000'.
+Parameter \VIDEO_RATE = 120'001101110011010000110010001101010011000000110000001100000011000000101110001100000011000000110000001100000011000000110000
+Parameter \AUDIO_RATE = 48000
+
+22.23. Executing AST frontend in derive mode using pre-parsed AST for module `\audio_clock_regeneration_packet'.
+Parameter \VIDEO_RATE = 120'001101110011010000110010001101010011000000110000001100000011000000101110001100000011000000110000001100000011000000110000
+Parameter \AUDIO_RATE = 48000
+Generating RTLIL representation for module `$paramod$03cb0f2bbd8cb75966066e68ce33b12cc6cde59c\audio_clock_regeneration_packet'.
+
+22.24. Analyzing design hierarchy..
+Top module:  \top
+Used module:     \z8086soc
+Used module:         \uart_simple
+Used module:         \z8086hdmi
+Used module:             $paramod$901da6f9edb7f22ba139f26087f592badc570823\hdmi
+Used module:                 $paramod\tmds_channel\CN=s32'00000000000000000000000000000010
+Used module:                 $paramod\tmds_channel\CN=s32'00000000000000000000000000000001
+Used module:                 $paramod\tmds_channel\CN=s32'00000000000000000000000000000000
+Used module:                 \packet_assembler
+Used module:                 $paramod$5c4e3bf47ea240664332b1e79d0c8526c28d5529\packet_picker
+Used module:                     \audio_info_frame
+Used module:                     $paramod$47a0a978ff1011d061114387ba827cec1525970f\source_product_description_info_frame
+Used module:                     $paramod\auxiliary_video_information_info_frame\VIDEO_ID_CODE=7'0000100\IT_CONTENT=1'1
+Used module:                     $paramod\audio_sample_packet\SAMPLING_FREQUENCY=4'0010\WORD_LENGTH=4'1000
+Used module:                     $paramod$03cb0f2bbd8cb75966066e68ce33b12cc6cde59c\audio_clock_regeneration_packet
+Used module:                 $paramod$d2f1ea176df49eb62beb5db06ab25170a297a667\serializer
+Used module:             $paramod$3a017fecfeb286358e44f3d59fb517a699c8e687\sprom
+Used module:             $paramod$fc6d69e38d228916313d1d46676b6b282e4b262e\vram_ecp5
+Used module:         $paramod$48529384c1d70e3935c19effcfeecab99938daa8\spram
+Used module:         \z8086
+Used module:             \alu
+
+22.25. Analyzing design hierarchy..
+Top module:  \top
+Used module:     \z8086soc
+Used module:         \uart_simple
+Used module:         \z8086hdmi
+Used module:             $paramod$901da6f9edb7f22ba139f26087f592badc570823\hdmi
+Used module:                 $paramod\tmds_channel\CN=s32'00000000000000000000000000000010
+Used module:                 $paramod\tmds_channel\CN=s32'00000000000000000000000000000001
+Used module:                 $paramod\tmds_channel\CN=s32'00000000000000000000000000000000
+Used module:                 \packet_assembler
+Used module:                 $paramod$5c4e3bf47ea240664332b1e79d0c8526c28d5529\packet_picker
+Used module:                     \audio_info_frame
+Used module:                     $paramod$47a0a978ff1011d061114387ba827cec1525970f\source_product_description_info_frame
+Used module:                     $paramod\auxiliary_video_information_info_frame\VIDEO_ID_CODE=7'0000100\IT_CONTENT=1'1
+Used module:                     $paramod\audio_sample_packet\SAMPLING_FREQUENCY=4'0010\WORD_LENGTH=4'1000
+Used module:                     $paramod$03cb0f2bbd8cb75966066e68ce33b12cc6cde59c\audio_clock_regeneration_packet
+Used module:                 $paramod$d2f1ea176df49eb62beb5db06ab25170a297a667\serializer
+Used module:             $paramod$3a017fecfeb286358e44f3d59fb517a699c8e687\sprom
+Used module:             $paramod$fc6d69e38d228916313d1d46676b6b282e4b262e\vram_ecp5
+Used module:         $paramod$48529384c1d70e3935c19effcfeecab99938daa8\spram
+Used module:         \z8086
+Used module:             \alu
+Removing unused module `$paramod\audio_sample_packet\SAMPLING_FREQUENCY=4'0000\WORD_LENGTH=4'1000'.
+Removing unused module `$paramod\auxiliary_video_information_info_frame\VIDEO_ID_CODE=7'0000100\IT_CONTENT=1'0'.
+Removing unused module `$paramod$bccc2f67f2b3ff6d634a697ff55129270b80b6eb\source_product_description_info_frame'.
+Removing unused module `\hdmi'.
+Removing unused module `$paramod$ecd83189f5e32d48e1465dd6e2abd70dacffc182\audio_clock_regeneration_packet'.
+Removing unused module `$paramod$58e1ab6fed64c0eea8102b55d653070f0246ccd1\packet_picker'.
+Removing unused module `\source_product_description_info_frame'.
+Removing unused module `\auxiliary_video_information_info_frame'.
+Removing unused module `\audio_clock_regeneration_packet'.
+Removing unused module `\audio_sample_packet'.
+Removing unused module `\packet_picker'.
+Removing unused module `\serializer'.
+Removing unused module `\tmds_channel'.
+Removing unused module `$paramod$ceaa779ccfb1617d562266555df3b011d1aae697\serializer'.
+Removing unused module `\sprom'.
+Removing unused module `\spram'.
+Removing unused module `\vram_ecp5'.
+Removed 17 unused modules.
+Warning: Resizing cell port z8086hdmi.hdmi.cy from 11 bits to 10 bits.
+Warning: Resizing cell port z8086hdmi.hdmi.reset from 32 bits to 1 bits.
+
+23. Printing statistics.
+
+=== $paramod$d2f1ea176df49eb62beb5db06ab25170a297a667\serializer ===
+
+        +----------Local Count, excluding submodules.
+        |
+       83 wires
+      434 wire bits
+       22 public wires
+      179 public wire bits
+        6 ports
+       37 port bits
+       39 processes
+        9 cells
+        1   $logic_not
+        3   $shr
+        1   $xor
+        4   ODDRX1F
+
+=== $paramod$48529384c1d70e3935c19effcfeecab99938daa8\spram ===
+
+        +----------Local Count, excluding submodules.
+        |
+       18 wires
+      193 wire bits
+        7 public wires
+       69 public wire bits
+        6 ports
+       52 port bits
+        1 memories
+  1048576 memory bits
+        2 processes
+        2 cells
+        1   $meminit_v2
+        1   $memrd
+
+=== $paramod$03cb0f2bbd8cb75966066e68ce33b12cc6cde59c\audio_clock_regeneration_packet ===
+
+        +----------Local Count, excluding submodules.
+        |
+       18 wires
+      604 wire bits
+       12 public wires
+      523 public wire bits
+        5 ports
+      251 port bits
+        3 processes
+        2 cells
+        1   $add
+        1   $xor
+
+=== $paramod\audio_sample_packet\SAMPLING_FREQUENCY=4'0010\WORD_LENGTH=4'1000 ===
+
+        +----------Local Count, excluding submodules.
+        |
+       43 wires
+     1108 wire bits
+       27 public wires
+      900 public wire bits
+        7 ports
+      468 port bits
+        1 processes
+
+=== $paramod\auxiliary_video_information_info_frame\VIDEO_ID_CODE=7'0000100\IT_CONTENT=1'1 ===
+
+        +----------Local Count, excluding submodules.
+        |
+        6 wires
+      472 wire bits
+        6 public wires
+      472 public wire bits
+        2 ports
+      248 port bits
+
+=== audio_info_frame ===
+
+        +----------Local Count, excluding submodules.
+        |
+        6 wires
+      472 wire bits
+        6 public wires
+      472 public wire bits
+        2 ports
+      248 port bits
+
+=== $paramod$47a0a978ff1011d061114387ba827cec1525970f\source_product_description_info_frame ===
+
+        +----------Local Count, excluding submodules.
+        |
+        6 wires
+      472 wire bits
+        6 public wires
+      472 public wire bits
+        2 ports
+      248 port bits
+
+=== $paramod$901da6f9edb7f22ba139f26087f592badc570823\hdmi ===
+
+        +----------Local Count, excluding submodules.
+        |
+      214 wires
+     2424 wire bits
+       46 public wires
+      617 public wire bits
+       14 ports
+      127 port bits
+       24 processes
+      121 cells
+       27   $add
+        1   $div
+       10   $eq
+        9   $ge
+        4   $gt
+       16   $logic_and
+        4   $logic_or
+       13   $lt
+        3   $mul
+        7   $mux
+        1   $ne
+       22   $sub
+        4   $xor
+        6 submodules
+        1   $paramod$5c4e3bf47ea240664332b1e79d0c8526c28d5529\packet_picker
+        1   $paramod$d2f1ea176df49eb62beb5db06ab25170a297a667\serializer
+        1   $paramod\tmds_channel\CN=s32'00000000000000000000000000000000
+        1   $paramod\tmds_channel\CN=s32'00000000000000000000000000000001
+        1   $paramod\tmds_channel\CN=s32'00000000000000000000000000000010
+        1   packet_assembler
+
+=== packet_assembler ===
+
+        +----------Local Count, excluding submodules.
+        |
+      195 wires
+     2402 wire bits
+       68 public wires
+     1189 public wire bits
+        7 ports
+      265 port bits
+       29 processes
+       67 cells
+        1   $add
+        1   $eq
+        2   $lt
+        9   $mux
+        9   $reduce_bool
+       18   $shiftx
+        9   $shr
+       18   $xor
+
+=== $paramod$5c4e3bf47ea240664332b1e79d0c8526c28d5529\packet_picker ===
+
+        +----------Local Count, excluding submodules.
+        |
+      216 wires
+     6868 wire bits
+       46 public wires
+     2117 public wire bits
+        9 ports
+      290 port bits
+        1 memories
+      384 memory bits
+       24 processes
+       91 cells
+       26   $add
+        1   $and
+        8   $eq
+        1   $ge
+        1   $logic_and
+        3   $logic_not
+        1   $logic_or
+       10   $memrd
+       16   $mul
+        4   $not
+       17   $sub
+        3   $xor
+        5 submodules
+        1   $paramod$03cb0f2bbd8cb75966066e68ce33b12cc6cde59c\audio_clock_regeneration_packet
+        1   $paramod$47a0a978ff1011d061114387ba827cec1525970f\source_product_description_info_frame
+        1   $paramod\audio_sample_packet\SAMPLING_FREQUENCY=4'0010\WORD_LENGTH=4'1000
+        1   $paramod\auxiliary_video_information_info_frame\VIDEO_ID_CODE=7'0000100\IT_CONTENT=1'1
+        1   audio_info_frame
+
+=== $paramod\tmds_channel\CN=s32'00000000000000000000000000000000 ===
+
+        +----------Local Count, excluding submodules.
+        |
+      109 wires
+      577 wire bits
+       19 public wires
+      153 public wire bits
+        6 ports
+       28 port bits
+        8 processes
+       66 cells
+       16   $add
+        7   $eq
+        3   $gt
+        3   $logic_and
+        3   $logic_or
+        2   $lt
+        6   $mux
+        1   $ne
+        5   $not
+        6   $sub
+        7   $xnor
+        7   $xor
+
+=== $paramod\tmds_channel\CN=s32'00000000000000000000000000000001 ===
+
+        +----------Local Count, excluding submodules.
+        |
+      103 wires
+      544 wire bits
+       19 public wires
+      153 public wire bits
+        6 ports
+       28 port bits
+        8 processes
+       60 cells
+       16   $add
+        4   $eq
+        3   $gt
+        3   $logic_and
+        3   $logic_or
+        2   $lt
+        3   $mux
+        1   $ne
+        5   $not
+        6   $sub
+        7   $xnor
+        7   $xor
+
+=== $paramod\tmds_channel\CN=s32'00000000000000000000000000000010 ===
+
+        +----------Local Count, excluding submodules.
+        |
+      103 wires
+      544 wire bits
+       19 public wires
+      153 public wire bits
+        6 ports
+       28 port bits
+        8 processes
+       60 cells
+       16   $add
+        4   $eq
+        3   $gt
+        3   $logic_and
+        3   $logic_or
+        2   $lt
+        3   $mux
+        1   $ne
+        5   $not
+        6   $sub
+        7   $xnor
+        7   $xor
+
+=== $paramod$fc6d69e38d228916313d1d46676b6b282e4b262e\vram_ecp5 ===
+
+        +----------Local Count, excluding submodules.
+        |
+       28 wires
+      350 wire bits
+        9 public wires
+      107 public wire bits
+        8 ports
+       75 port bits
+        1 memories
+    38400 memory bits
+        3 processes
+        6 cells
+        3   $lt
+        1   $meminit_v2
+        2   $memrd
+
+=== uart_simple ===
+
+        +----------Local Count, excluding submodules.
+        |
+       62 wires
+      556 wire bits
+       19 public wires
+       68 public wire bits
+       10 ports
+       24 port bits
+        3 processes
+       31 cells
+       13   $add
+       13   $eq
+        4   $logic_not
+        1   $ne
+
+=== z8086soc ===
+
+        +----------Local Count, excluding submodules.
+        |
+      129 wires
+      594 wire bits
+       53 public wires
+      232 public wire bits
+       10 ports
+       21 port bits
+        9 processes
+       48 cells
+        2   $add
+        7   $and
+        6   $eq
+        1   $ge
+        2   $logic_and
+        2   $logic_not
+        1   $lt
+       10   $mux
+       11   $not
+        3   $or
+        1   $sub
+        1   pll27
+        1   pll74
+        4 submodules
+        1   $paramod$48529384c1d70e3935c19effcfeecab99938daa8\spram
+        1   uart_simple
+        1   z8086
+        1   z8086hdmi
+
+=== z8086hdmi ===
+
+        +----------Local Count, excluding submodules.
+        |
+      181 wires
+     1962 wire bits
+       53 public wires
+      326 public wire bits
+       18 ports
+       95 port bits
+        2 memories
+      464 memory bits
+       15 processes
+       72 cells
+        6   $add
+        1   $div
+       13   $eq
+        2   $ge
+        1   $le
+        9   $logic_and
+        2   $logic_not
+        3   $lt
+       16   $meminit_v2
+        4   $memrd
+        1   $mod
+        2   $mul
+        4   $mux
+        1   $not
+        1   $pos
+        2   $sub
+        4   OBUFDS
+        3 submodules
+        1   $paramod$3a017fecfeb286358e44f3d59fb517a699c8e687\sprom
+        1   $paramod$901da6f9edb7f22ba139f26087f592badc570823\hdmi
+        1   $paramod$fc6d69e38d228916313d1d46676b6b282e4b262e\vram_ecp5
+
+=== z8086 ===
+
+        +----------Local Count, excluding submodules.
+        |
+     1054 wires
+     4216 wire bits
+      201 public wires
+     1037 public wire bits
+       13 ports
+       62 port bits
+        2 memories
+    12336 memory bits
+       28 processes
+      542 cells
+       13   $add
+      134   $and
+      151   $eq
+        1   $gt
+       25   $logic_and
+       11   $logic_not
+        6   $logic_or
+        1   $meminit_v2
+        3   $memrd
+       25   $mux
+       12   $ne
+       79   $not
+       67   $or
+        1   $shl
+        9   $sub
+        4   $xor
+        1 submodules
+        1   alu
+
+=== alu ===
+
+        +----------Local Count, excluding submodules.
+        |
+      846 wires
+     1657 wire bits
+      320 public wires
+      622 public wire bits
+        8 ports
+       87 port bits
+       18 processes
+      202 cells
+       34   $and
+       46   $eq
+        3   $gt
+        1   $logic_and
+        2   $logic_not
+       32   $logic_or
+       16   $mux
+        1   $ne
+        8   $not
+       33   $or
+        1   $reduce_xnor
+        4   $shiftx
+        2   $sub
+       19   $xor
+
+=== $paramod$3a017fecfeb286358e44f3d59fb517a699c8e687\sprom ===
+
+        +----------Local Count, excluding submodules.
+        |
+        6 wires
+       53 wire bits
+        4 public wires
+       33 public wire bits
+        3 ports
+       21 port bits
+        1 memories
+    32768 memory bits
+        2 processes
+        2 cells
+        1   $meminit_v2
+        1   $memrd
+
+=== top ===
+
+        +----------Local Count, excluding submodules.
+        |
+       21 wires
+      151 wire bits
+       18 public wires
+       79 public wire bits
+        8 ports
+       27 port bits
+        1 processes
+        1 cells
+        1   $add
+        1 submodules
+        1   z8086soc
+
+=== design hierarchy ===
+
+        +----------Count including submodules.
+        |
+     1382 top
+       48 z8086soc
+        2   $paramod$48529384c1d70e3935c19effcfeecab99938daa8\spram
+       31   uart_simple
+      542   z8086
+      202     alu
+       72   z8086hdmi
+        2     $paramod$3a017fecfeb286358e44f3d59fb517a699c8e687\sprom
+      121     $paramod$901da6f9edb7f22ba139f26087f592badc570823\hdmi
+       91       $paramod$5c4e3bf47ea240664332b1e79d0c8526c28d5529\packet_picker
+        2         $paramod$03cb0f2bbd8cb75966066e68ce33b12cc6cde59c\audio_clock_regeneration_packet
+        9       $paramod$d2f1ea176df49eb62beb5db06ab25170a297a667\serializer
+       66       $paramod\tmds_channel\CN=s32'00000000000000000000000000000000
+       60       $paramod\tmds_channel\CN=s32'00000000000000000000000000000001
+       60       $paramod\tmds_channel\CN=s32'00000000000000000000000000000010
+       67       packet_assembler
+        6     $paramod$fc6d69e38d228916313d1d46676b6b282e4b262e\vram_ecp5
+
+        +----------Count including submodules.
+        |
+     3447 wires
+    26653 wire bits
+      980 public wires
+     9973 public wire bits
+      156 ports
+     2730 port bits
+        8 memories
+  1132928 memory bits
+      225 processes
+     1382 cells
+      138   $add
+      176   $and
+        2   $div
+      263   $eq
+       13   $ge
+       17   $gt
+        1   $le
+       63   $logic_and
+       25   $logic_not
+       52   $logic_or
+       28   $lt
+       20   $meminit_v2
+       21   $memrd
+        1   $mod
+       21   $mul
+       83   $mux
+       18   $ne
+      118   $not
+      103   $or
+        1   $pos
+        9   $reduce_bool
+        1   $reduce_xnor
+       22   $shiftx
+        1   $shl
+       12   $shr
+       71   $sub
+       21   $xnor
+       71   $xor
+        4   OBUFDS
+        4   ODDRX1F
+        1   pll27
+        1   pll74
+        1 submodules
+        1   z8086soc
+
+Warnings: 21 unique messages, 35 total
+End of script. Logfile hash: 627621710b, CPU: user 10.48s system 0.44s, MEM: 65.30 MB peak
+Yosys 0.60+70 (git sha1 8101c87fa, g++ 11.4.0-1ubuntu1~22.04 -fPIC -O3)
+Time spent: 95% 22x read_verilog (10 sec), 3% 1x hierarchy (0 sec), ...
+gojimmypi:/mnt/c/workspace/z8086-gojimmypi
+$

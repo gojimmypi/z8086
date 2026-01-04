@@ -65,6 +65,24 @@ reg [11:0] vram_addr_b;
 //    .wren_b(1'b0)
 //);
 
+`ifdef ULX3S
+    vram_ecp5 #(
+        .DATA_W(16),
+        .ADDR_W(12),
+        .DEPTH(2400),
+        .INIT_FILE("boards/ULX3S/screen.hex")   // or "" if you do not want init
+    ) u_vram (
+        .clka(clk),
+        .addra(addr),
+        .dina(din),
+        .douta(vram_q_a),
+        .wea(wr),
+
+        .clkb(clk_pixel),
+        .addrb(vram_addr_b),
+        .doutb(vram_q_b)
+    );
+`else
  vram u_vram (
      .clka(clk),
      .ada(addr),
@@ -73,17 +91,18 @@ reg [11:0] vram_addr_b;
      .ocea(1'b0),   // CE for registered output
      .cea(1'b1),
      .reseta(1'b0),
-     .wrea(wr), 
+     .wrea(wr),
 
      .clkb(clk_pixel),
      .adb(vram_addr_b),
-     .dinb(16'h0000), 
+     .dinb(16'h0000),
      .doutb(vram_q_b),
-     .oceb(1'b0), 
-     .ceb(1'b1), 
+     .oceb(1'b0),
+     .ceb(1'b1),
      .resetb(1'b0),
      .wreb(1'b0)
  );
+ `endif
 
 assign dout = vram_q_a;
 assign ready = 1'b1;  // Single-cycle access for dual-port RAM
@@ -197,7 +216,7 @@ reg [4:0] pixel_y;    // y within character 0-23
 reg       active;     // [OFFSET_X - CHAR_WIDTH, END_X - CHAR_WIDTH)
 reg       visible;    // [OFFSET_X, END_X) & [OFFSET_Y, END_Y]
 always @(posedge clk_pixel) begin
-    case (cx) 
+    case (cx)
     0: begin
         visible <= 0;
         char_x <= 0;
@@ -229,6 +248,8 @@ reg blink_suppress_r = 1'b0;
 wire [3:0] fg_index = curr_attr[3:0];
 wire [3:0] bg_index = blink_enable ? {1'b0, curr_attr[6:4]} : curr_attr[7:4];
 wire pixel_on = cursor_hit_r ? 1'b1 : (font_shift[0] && !blink_suppress_r);
+
+wire tmdsClk;
 
 always @(posedge clk_pixel) begin
     // Sequential read of settings at frame end (cx == 1279, cy == 719)
@@ -303,7 +324,7 @@ always @(posedge clk_pixel) begin
     if (pixel_x == 11) begin
         font_shift <= font_data[5:0];  // Load 6-bit font row
     end else if (pixel_x[0]) begin
-        // ===== Shift Operation ===== 
+        // ===== Shift Operation =====
         font_shift <= font_shift[5:1];  // Shift right, fill with 0
     end
 
@@ -351,11 +372,20 @@ hdmi(   .clk_pixel_x5(clk_5x_pixel),
         .frame_width(),
         .frame_height() );
 
-// Gowin LVDS output buffer
-ELVDS_OBUF tmds_bufds [3:0] (
-    .I({clk_pixel, tmds}),
-    .O({tmds_clk_p, tmds_d_p}),
-    .OB({tmds_clk_n, tmds_d_n})
-);
+`ifdef ULX3S
+    // ECP5: differential outputs
+    OBUFDS u_clk (.I(clk_pixel), .O(tmds_clk_p), .OB(tmds_clk_n));
+    OBUFDS u_d0  (.I(tmds[0]),   .O(tmds_d_p[0]), .OB(tmds_d_n[0]));
+    OBUFDS u_d1  (.I(tmds[1]),   .O(tmds_d_p[1]), .OB(tmds_d_n[1]));
+    OBUFDS u_d2  (.I(tmds[2]),   .O(tmds_d_p[2]), .OB(tmds_d_n[2]));
+`else
+    // Gowin LVDS output buffer
+    ELVDS_OBUF tmds_bufds [3:0] (
+        .I({clk_pixel, tmds}),
+        .O({tmds_clk_p, tmds_d_p}),
+        .OB({tmds_clk_n, tmds_d_n})
+    );
+`endif
+
 
 endmodule

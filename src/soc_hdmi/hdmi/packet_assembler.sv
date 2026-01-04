@@ -6,10 +6,24 @@ module packet_assembler (
     input logic reset,
     input logic data_island_period,
     input logic [23:0] header, // See Table 5-8 Packet Types
-    input logic [55:0] sub [3:0],
+
+    // NOTE: minimal change for Yosys compatibility:
+    // flatten unpacked array port "sub [3:0]" into a packed vector.
+    input logic [4*56-1:0] sub,
+
     output logic [8:0] packet_data, // See Figure 5-4 Data Island Packet and ECC Structure
     output logic [4:0] counter = 5'd0
 );
+
+    // Unpack flattened "sub" back into the original array form for internal use.
+    logic [55:0] sub_arr [3:0];
+    genvar _u;
+    generate
+        for (_u = 0; _u < 4; _u = _u + 1)
+        begin: unpack_sub
+            assign sub_arr[_u] = sub[_u*56 +: 56];
+        end
+    endgenerate
 
 // 32 pixel wrap-around counter. See Section 5.2.3.4 for further information.
 always_ff @(posedge clk_pixel)
@@ -19,20 +33,32 @@ begin
     else if (data_island_period)
         counter <= counter + 5'd1;
 end
+
 // BCH packets 0 to 3 are transferred two bits at a time, see Section 5.2.3.4 for further information.
 wire [5:0] counter_t2 = {counter, 1'b0};
 wire [5:0] counter_t2_p1 = {counter, 1'b1};
 
-// Initialize parity bits to 0
-logic [7:0] parity [4:0] = '{8'd0, 8'd0, 8'd0, 8'd0, 8'd0};
+// Initialize parity bits to 0 (expanded, Yosys-friendly: no array literal init)
+logic [7:0] parity [4:0];
 
 wire [63:0] bch [3:0];
-assign bch[0] = {parity[0], sub[0]};
-assign bch[1] = {parity[1], sub[1]};
-assign bch[2] = {parity[2], sub[2]};
-assign bch[3] = {parity[3], sub[3]};
+assign bch[0] = {parity[0], sub_arr[0]};
+assign bch[1] = {parity[1], sub_arr[1]};
+assign bch[2] = {parity[2], sub_arr[2]};
+assign bch[3] = {parity[3], sub_arr[3]};
 wire [31:0] bch4 = {parity[4], header};
-assign packet_data = {bch[3][counter_t2_p1], bch[2][counter_t2_p1], bch[1][counter_t2_p1], bch[0][counter_t2_p1], bch[3][counter_t2], bch[2][counter_t2], bch[1][counter_t2], bch[0][counter_t2], bch4[counter]};
+
+assign packet_data = {
+    bch[3][counter_t2_p1],
+    bch[2][counter_t2_p1],
+    bch[1][counter_t2_p1],
+    bch[0][counter_t2_p1],
+    bch[3][counter_t2],
+    bch[2][counter_t2],
+    bch[1][counter_t2],
+    bch[0][counter_t2],
+    bch4[counter]
+};
 
 // See Figure 5-5 Error Correction Code generator. Generalization of a CRC with binary BCH.
 // See https://web.archive.org/web/20190520020602/http://hamsterworks.co.nz/mediawiki/index.php/Minimal_HDMI#Computing_the_ECC for an explanation of the implementation.
@@ -52,14 +78,14 @@ logic [7:0] parity_next_next [3:0];
 
 genvar i;
 generate
-    for(i = 0; i < 5; i++)
+    for (i = 0; i < 5; i = i + 1)
     begin: parity_calc
         if (i == 4)
             assign parity_next[i] = next_ecc(parity[i], header[counter]);
         else
         begin
-            assign parity_next[i] = next_ecc(parity[i], sub[i][counter_t2]);
-            assign parity_next_next[i] = next_ecc(parity_next[i], sub[i][counter_t2_p1]);
+            assign parity_next[i] = next_ecc(parity[i], sub_arr[i][counter_t2]);
+            assign parity_next_next[i] = next_ecc(parity_next[i], sub_arr[i][counter_t2_p1]);
         end
     end
 endgenerate
@@ -67,20 +93,42 @@ endgenerate
 always_ff @(posedge clk_pixel)
 begin
     if (reset)
-        parity <= '{8'd0, 8'd0, 8'd0, 8'd0, 8'd0};
+    begin
+        parity[0] <= 8'd0;
+        parity[1] <= 8'd0;
+        parity[2] <= 8'd0;
+        parity[3] <= 8'd0;
+        parity[4] <= 8'd0;
+    end
     else if (data_island_period)
     begin
         if (counter < 5'd28) // Compute ECC only on subpacket data, not on itself
         begin
-            parity[3:0] <= parity_next_next;
+            parity[0] <= parity_next_next[0];
+            parity[1] <= parity_next_next[1];
+            parity[2] <= parity_next_next[2];
+            parity[3] <= parity_next_next[3];
+
             if (counter < 5'd24) // Header only has 24 bits, whereas subpackets have 56 and 56 / 2 = 28.
                 parity[4] <= parity_next[4];
         end
         else if (counter == 5'd31)
-            parity <= '{8'd0, 8'd0, 8'd0, 8'd0, 8'd0}; // Reset ECC for next packet
+        begin
+            parity[0] <= 8'd0;
+            parity[1] <= 8'd0;
+            parity[2] <= 8'd0;
+            parity[3] <= 8'd0;
+            parity[4] <= 8'd0; // Reset ECC for next packet
+        end
     end
     else
-        parity <= '{8'd0, 8'd0, 8'd0, 8'd0, 8'd0};
+    begin
+        parity[0] <= 8'd0;
+        parity[1] <= 8'd0;
+        parity[2] <= 8'd0;
+        parity[3] <= 8'd0;
+        parity[4] <= 8'd0;
+    end
 end
 
 endmodule

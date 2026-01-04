@@ -1,4 +1,8 @@
-`define GW_IDE
+`ifdef ULX3S
+    // no GW_IDE
+`else
+    `define GW_IDE
+`endif
 
 module serializer
 #(
@@ -9,20 +13,131 @@ module serializer
     input logic clk_pixel,
     input logic clk_pixel_x5,
     input logic reset,
-    input logic [9:0] tmds_internal [NUM_CHANNELS-1:0],
+
+    // NOTE: minimal change for Yosys compatibility:
+    // flatten unpacked array port "tmds_internal [NUM_CHANNELS-1:0]" into a packed vector.
+    input logic [NUM_CHANNELS*10-1:0] tmds_internal,
+
+    // Existing outputs kept for non-ULX3S paths.
     output logic [2:0] tmds,
-    output logic tmds_clock
+    output logic tmds_clock,
+
+    // ULX3S/ECP5: expose DDR input bits so ODDRX1F can be instantiated at top level.
+    output logic [NUM_CHANNELS-1:0] tmds_d0,
+    output logic [NUM_CHANNELS-1:0] tmds_d1,
+    output logic tmds_clk_d0,
+    output logic tmds_clk_d1
 );
+
+    // Unpack flattened tmds_internal back into the original array form for internal use.
+    logic [9:0] tmds_internal_arr [NUM_CHANNELS-1:0];
+    genvar _u;
+    generate
+        for (_u = 0; _u < NUM_CHANNELS; _u = _u + 1)
+        begin: unpack_tmds_internal
+            assign tmds_internal_arr[_u] = tmds_internal[_u*10 +: 10];
+        end
+    endgenerate
 
 `ifndef VERILATOR
     `ifdef SYNTHESIS
         `ifndef ALTERA_RESERVED_QIS
+
+            `ifdef ULX3S
+                // ECP5/ULX3S: 10:1 TMDS serializer using 5x clock + DDR output
+                // Two bits are launched each clk_pixel_x5 cycle via ODDRX1F.
+                // NOTE: nextpnr requires ODDRX1F.Q to connect directly to a top-level output.
+                // Therefore, we output the DDR input bits here and instantiate ODDRX1F at top level.
+
+                logic [9:0] tmds_reversed [NUM_CHANNELS-1:0];
+                genvar i, j;
+                generate
+                    for (i = 0; i < NUM_CHANNELS; i = i + 1) begin: ulx3s_tmds_rev
+                        for (j = 0; j < 10; j = j + 1) begin: ulx3s_tmds_rev_bit
+                            assign tmds_reversed[i][j] = tmds_internal_arr[i][9-j];
+                        end
+                    end
+                endgenerate
+
+                // Toggle in pixel clock domain, detect in 5x domain
+                logic tmds_control = 1'b0;
+                always_ff @(posedge clk_pixel) begin
+                    tmds_control <= !tmds_control;
+                end
+
+                logic [3:0] tmds_control_sync = 4'd0;
+                always_ff @(posedge clk_pixel_x5) begin
+                    tmds_control_sync <= {tmds_control, tmds_control_sync[3:1]};
+                end
+
+                logic load;
+                assign load = tmds_control_sync[1] ^ tmds_control_sync[0];
+
+                // Shift registers in 5x domain (shift by 2 because DDR launches 2 bits/cycle)
+                logic [9:0] tmds_shift [NUM_CHANNELS-1:0];
+                logic [9:0] tmds_shift_clk;
+
+                integer k;
+                initial begin
+                    for (k = 0; k < NUM_CHANNELS; k = k + 1) begin
+                        tmds_shift[k] = 10'd0;
+                    end
+                    tmds_shift_clk = 10'b0000011111;
+                end
+
+                always_ff @(posedge clk_pixel_x5) begin
+                    for (k = 0; k < NUM_CHANNELS; k = k + 1) begin
+                        if (load) begin
+                            tmds_shift[k] <= tmds_reversed[k];
+                        end else begin
+                            tmds_shift[k] <= (tmds_shift[k] >> 2);
+                        end
+                    end
+
+                    if (load) begin
+                        tmds_shift_clk <= 10'b0000011111;
+                    end else begin
+                        tmds_shift_clk <= {tmds_shift_clk[1:0], tmds_shift_clk[9:2]};
+                    end
+                end
+
+                // Expose the two DDR bits per channel; instantiate ODDRX1F at top level.
+                generate
+                    for (i = 0; i < NUM_CHANNELS; i = i + 1) begin: ulx3s_ddr_bits
+                        always_comb begin
+                            tmds_d0[i] = tmds_shift[i][0];
+                            tmds_d1[i] = tmds_shift[i][1];
+                        end
+                    end
+                endgenerate
+
+                always_comb begin
+                    tmds_clk_d0 = tmds_shift_clk[0];
+                    tmds_clk_d1 = tmds_shift_clk[1];
+                end
+
+                // Keep legacy outputs driven to known values in this ULX3S synthesis path.
+                // Top level should use tmds_d0/tmds_d1 and tmds_clk_d0/tmds_clk_d1.
+                always_comb begin
+                    tmds = 3'b000;
+                    tmds_clock = 1'b0;
+                end
+
+            `else
             // https://www.xilinx.com/support/documentation/user_guides/ug471_7Series_SelectIO.pdf
             logic tmds_plus_clock [NUM_CHANNELS:0];
-            assign tmds_plus_clock = '{tmds_clock, tmds[2], tmds[1], tmds[0]};
             logic [9:0] tmds_internal_plus_clock [NUM_CHANNELS:0];
-            assign tmds_internal_plus_clock = '{10'b0000011111, tmds_internal[2], tmds_internal[1], tmds_internal[0]};
             logic [1:0] cascade [NUM_CHANNELS:0];
+
+            assign tmds_plus_clock[0] = tmds_clock;
+            assign tmds_plus_clock[1] = tmds[2];
+            assign tmds_plus_clock[2] = tmds[1];
+            assign tmds_plus_clock[3] = tmds[0];
+
+            assign tmds_internal_plus_clock[0] = 10'b0000011111;
+            assign tmds_internal_plus_clock[1] = tmds_internal_arr[2];
+            assign tmds_internal_plus_clock[2] = tmds_internal_arr[1];
+            assign tmds_internal_plus_clock[3] = tmds_internal_arr[0];
 
             // this is requried for OSERDESE2 to work
             logic internal_reset = 1'b1;
@@ -89,6 +204,7 @@ module serializer
                         .TBYTEOUT(),
                         .CLK(clk_pixel_x5),
                         .CLKDIV(clk_pixel),
+
                         .D1(1'b0),
                         .D2(1'b0),
                         .D3(tmds_internal_plus_clock[i][8]),
@@ -97,6 +213,7 @@ module serializer
                         .D6(1'b0),
                         .D7(1'b0),
                         .D8(1'b0),
+
                         .TCE(1'b0),
                         .OCE(1'b1),
                         .TBYTEIN(1'b0),
@@ -110,58 +227,59 @@ module serializer
                     );
                 end
             endgenerate
+            `endif
         `endif
     `elsif GW_IDE
-        OSER10 gwSer0( 
+        OSER10 gwSer0(
             .Q( tmds[ 0 ] ),
-            .D0( tmds_internal[ 0 ][ 0 ] ),
-            .D1( tmds_internal[ 0 ][ 1 ] ),
-            .D2( tmds_internal[ 0 ][ 2 ] ),
-            .D3( tmds_internal[ 0 ][ 3 ] ),
-            .D4( tmds_internal[ 0 ][ 4 ] ),
-            .D5( tmds_internal[ 0 ][ 5 ] ),
-            .D6( tmds_internal[ 0 ][ 6 ] ),
-            .D7( tmds_internal[ 0 ][ 7 ] ),
-            .D8( tmds_internal[ 0 ][ 8 ] ),
-            .D9( tmds_internal[ 0 ][ 9 ] ),
+            .D0( tmds_internal_arr[ 0 ][ 0 ] ),
+            .D1( tmds_internal_arr[ 0 ][ 1 ] ),
+            .D2( tmds_internal_arr[ 0 ][ 2 ] ),
+            .D3( tmds_internal_arr[ 0 ][ 3 ] ),
+            .D4( tmds_internal_arr[ 0 ][ 4 ] ),
+            .D5( tmds_internal_arr[ 0 ][ 5 ] ),
+            .D6( tmds_internal_arr[ 0 ][ 6 ] ),
+            .D7( tmds_internal_arr[ 0 ][ 7 ] ),
+            .D8( tmds_internal_arr[ 0 ][ 8 ] ),
+            .D9( tmds_internal_arr[ 0 ][ 9 ] ),
             .PCLK( clk_pixel ),
             .FCLK( clk_pixel_x5 ),
             .RESET( reset ) );
 
-        OSER10 gwSer1( 
-          .Q( tmds[ 1 ] ),
-          .D0( tmds_internal[ 1 ][ 0 ] ),
-          .D1( tmds_internal[ 1 ][ 1 ] ),
-          .D2( tmds_internal[ 1 ][ 2 ] ),
-          .D3( tmds_internal[ 1 ][ 3 ] ),
-          .D4( tmds_internal[ 1 ][ 4 ] ),
-          .D5( tmds_internal[ 1 ][ 5 ] ),
-          .D6( tmds_internal[ 1 ][ 6 ] ),
-          .D7( tmds_internal[ 1 ][ 7 ] ),
-          .D8( tmds_internal[ 1 ][ 8 ] ),
-          .D9( tmds_internal[ 1 ][ 9 ] ),
-          .PCLK( clk_pixel ),
-          .FCLK( clk_pixel_x5 ),
-          .RESET( reset ) );
+        OSER10 gwSer1(
+            .Q( tmds[ 1 ] ),
+            .D0( tmds_internal_arr[ 1 ][ 0 ] ),
+            .D1( tmds_internal_arr[ 1 ][ 1 ] ),
+            .D2( tmds_internal_arr[ 1 ][ 2 ] ),
+            .D3( tmds_internal_arr[ 1 ][ 3 ] ),
+            .D4( tmds_internal_arr[ 1 ][ 4 ] ),
+            .D5( tmds_internal_arr[ 1 ][ 5 ] ),
+            .D6( tmds_internal_arr[ 1 ][ 6 ] ),
+            .D7( tmds_internal_arr[ 1 ][ 7 ] ),
+            .D8( tmds_internal_arr[ 1 ][ 8 ] ),
+            .D9( tmds_internal_arr[ 1 ][ 9 ] ),
+            .PCLK( clk_pixel ),
+            .FCLK( clk_pixel_x5 ),
+            .RESET( reset ) );
 
-        OSER10 gwSer2( 
-          .Q( tmds[ 2 ] ),
-          .D0( tmds_internal[ 2 ][ 0 ] ),
-          .D1( tmds_internal[ 2 ][ 1 ] ),
-          .D2( tmds_internal[ 2 ][ 2 ] ),
-          .D3( tmds_internal[ 2 ][ 3 ] ),
-          .D4( tmds_internal[ 2 ][ 4 ] ),
-          .D5( tmds_internal[ 2 ][ 5 ] ),
-          .D6( tmds_internal[ 2 ][ 6 ] ),
-          .D7( tmds_internal[ 2 ][ 7 ] ),
-          .D8( tmds_internal[ 2 ][ 8 ] ),
-          .D9( tmds_internal[ 2 ][ 9 ] ),
-          .PCLK( clk_pixel ),
-          .FCLK( clk_pixel_x5 ),
-          .RESET( reset ) );
-          
+        OSER10 gwSer2(
+            .Q( tmds[ 2 ] ),
+            .D0( tmds_internal_arr[ 2 ][ 0 ] ),
+            .D1( tmds_internal_arr[ 2 ][ 1 ] ),
+            .D2( tmds_internal_arr[ 2 ][ 2 ] ),
+            .D3( tmds_internal_arr[ 2 ][ 3 ] ),
+            .D4( tmds_internal_arr[ 2 ][ 4 ] ),
+            .D5( tmds_internal_arr[ 2 ][ 5 ] ),
+            .D6( tmds_internal_arr[ 2 ][ 6 ] ),
+            .D7( tmds_internal_arr[ 2 ][ 7 ] ),
+            .D8( tmds_internal_arr[ 2 ][ 8 ] ),
+            .D9( tmds_internal_arr[ 2 ][ 9 ] ),
+            .PCLK( clk_pixel ),
+            .FCLK( clk_pixel_x5 ),
+            .RESET( reset ) );
+
         assign tmds_clock = clk_pixel;
-  
+
     `else
         logic [9:0] tmds_reversed [NUM_CHANNELS-1:0];
         genvar i, j;
@@ -170,7 +288,7 @@ module serializer
             begin: tmds_rev
                 for (j = 0; j < 10; j++)
                 begin: tmds_rev_channel
-                    assign tmds_reversed[i][j] = tmds_internal[i][9-j];
+                    assign tmds_reversed[i][j] = tmds_internal_arr[i][9-j];
                 end
             end
         endgenerate
@@ -190,7 +308,7 @@ module serializer
             end
         `else
             `ifdef ALTERA_RESERVED_QIS
-                altlvds_tx	ALTLVDS_TX_component (
+                altlvds_tx ALTLVDS_TX_component (
                     .tx_in ({10'b1111100000, tmds_reversed[2], tmds_reversed[1], tmds_reversed[0]}),
                     .tx_inclock (clk_pixel_x5),
                     .tx_out ({tmds_clock, tmds[2], tmds[1], tmds[0]}),
@@ -233,7 +351,7 @@ module serializer
                     ALTLVDS_TX_component.preemphasis_setting = 0,
                     // ALTLVDS_TX_component.refclk_frequency = "20.000000 MHz",
                     ALTLVDS_TX_component.registered_input = "OFF",
-                    ALTLVDS_TX_component.use_external_pll = "ON",
+                    ALTLVDS_TXcomponent.use_external_pll = "ON",
                     ALTLVDS_TX_component.use_no_phase_shift = "ON",
                     ALTLVDS_TX_component.vod_setting = 0,
                     ALTLVDS_TX_component.clk_src_is_pll = "off";
@@ -257,7 +375,7 @@ module serializer
                     always_comb
                     begin
                         if (load)
-                            tmds_mux = tmds_internal;
+                            tmds_mux = tmds_internal_arr;
                         else
                             tmds_mux = tmds_shift;
                     end
@@ -291,7 +409,7 @@ module serializer
                         tmds_clock_negedge_temp <= tmds_shift_clk_pixel[1];
                     end
                     always_ff @(negedge clk_pixel_x5)
-                        tmds_clock <= tmds_shift_negedge_temp;
+                        tmds_clock <= tmds_clock_negedge_temp;
 
                 `endif
         `endif
