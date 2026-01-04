@@ -1,9 +1,6 @@
-// file: src/soc_hdmi/pll74.v
-// ULX3S/ECP5 replacement for Tang "pll74".
-// nextpnr-ecp5 does not support the Tang-specific pll74 cell, so map to ECP5 EHXPLLL.
-//
-// Ports preserved for minimal integration.
-// mdclk is unused on ULX3S/ECP5; kept only for compatibility.
+// file: boards/ULX3S/pll74.sv
+// ULX3S/ECP5 PLL: 25 MHz input -> 25 MHz pixel + 125 MHz (5x) output.
+// Uses a legal VCO (625 MHz).
 
 module pll74 (
     input  wire clkin,
@@ -11,60 +8,51 @@ module pll74 (
     output wire clkout1,
     input  wire mdclk
 );
+    // mdclk intentionally unused
+    wire _unused_mdclk = mdclk;
 
-    // Silence unused warning; mdclk is only used on Tang dynamic PLL programming.
-    wire mdclk_unused;
-    assign mdclk_unused = mdclk;
+    wire lock;
+    wire clkfb;
 
-    // ECP5 PLL primitive.
-    // Replace these divider values to match the required frequencies.
-    // Feed-back path uses CLKOP.
+    // EHXPLLL primitive (ECP5)
     EHXPLLL #(
         .PLLRST_ENA("DISABLED"),
         .INTFB_WAKE("DISABLED"),
         .STDBY_ENABLE("DISABLED"),
         .DPHASE_SOURCE("DISABLED"),
-
-        .CLKOP_ENABLE("ENABLED"),
-        .CLKOS_ENABLE("ENABLED"),
-        .CLKOS2_ENABLE("DISABLED"),
-        .CLKOS3_ENABLE("DISABLED"),
-
-        .OUTDIVIDER_MUXA("DIVD"),
-        .OUTDIVIDER_MUXB("DIVD"),
-        .OUTDIVIDER_MUXC("DIVD"),
+        .OUTDIVIDER_MUXA("DIVA"),
+        .OUTDIVIDER_MUXB("DIVB"),
+        .OUTDIVIDER_MUXC("DIVC"),
         .OUTDIVIDER_MUXD("DIVD"),
 
-        // --------------------------------------------------------------------
-        // TODO: Set these to generate the correct clkout0 and clkout1.
-        // clkin is your clk27 in ULX3S build (see z8086soc.sv).
-        //
-        // Common pattern:
-        // - clkout0 = pixel clock
-        // - clkout1 = 5x pixel clock
-        //
-        // These placeholders are NOT guaranteed correct.
-        // --------------------------------------------------------------------
         .CLKI_DIV(1),
-        .CLKFB_DIV(1),
-        .CLKOP_DIV(1),
-        .CLKOS_DIV(1),
+        .CLKFB_DIV(25),
 
+        .CLKOP_ENABLE("ENABLED"),
+        .CLKOP_DIV(25),
         .CLKOP_CPHASE(0),
-        .CLKOS_CPHASE(0),
         .CLKOP_FPHASE(0),
+
+        .CLKOS_ENABLE("ENABLED"),
+        .CLKOS_DIV(5),
+        .CLKOS_CPHASE(0),
         .CLKOS_FPHASE(0),
+
+        .CLKOS2_ENABLE("DISABLED"),
+        .CLKOS3_ENABLE("DISABLED"),
 
         .FEEDBK_PATH("CLKOP")
     ) pll_i (
         .CLKI(clkin),
-
-        // Feedback from CLKOP (clkout0)
-        .CLKFB(clkout0),
-
+        .CLKFB(clkfb),
+        .CLKOP(clkout0),
+        .CLKOS(clkout1),
+        .CLKOS2(),
+        .CLKOS3(),
         .RST(1'b0),
         .STDBY(1'b0),
-
+        .LOCK(lock),
+        .INTLOCK(),
         .PHASESEL0(1'b0),
         .PHASESEL1(1'b0),
         .PHASEDIR(1'b0),
@@ -72,20 +60,12 @@ module pll74 (
         .PHASELOADREG(1'b0),
         .PLLWAKESYNC(1'b0),
 
-        .ENCLKOP(1'b1),
-        .ENCLKOS(1'b1),
+        .ENCLKOP(1'b0),
+        .ENCLKOS(1'b0),
         .ENCLKOS2(1'b0),
-        .ENCLKOS3(1'b0),
-
-        .CLKOP(clkout0),
-        .CLKOS(clkout1),
-        .CLKOS2(),
-        .CLKOS3(),
-
-        .LOCK(),
-        .INTLOCK(),
-        .REFCLK(),
-        .CLKINTFB()
+        .ENCLKOS3(1'b0)
     );
+
+    assign clkfb = clkout0;
 
 endmodule
